@@ -56,8 +56,10 @@ setValidity2("GenomicData", .valid.GenomicData)
 
 GenomicData <- function(ranges, ..., strand = NULL, chrom = NULL, genome = NULL)
 {
-  if (!is.null(chrom) && length(chrom) != length(ranges))
-    stop("length of 'chrom' (if non-NULL) must match length of 'ranges'")
+  if (length(chrom) > length(ranges))
+    stop("length of 'chrom' greater than length of 'ranges'")
+  if (length(chrom) > 0 && (length(ranges) %% length(chrom) != 0))
+    stop("length of 'ranges' not a multiple of 'chrom' length")
   if (!is.null(genome) && !isSingleString(genome))
     stop("'genome' must be a single string")
   gd <- new("GenomicData",

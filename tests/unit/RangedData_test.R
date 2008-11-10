@@ -124,8 +124,10 @@ test_RangedData_subset <- function() {
   checkException(rd[c(TRUE, TRUE, TRUE, TRUE)], silent = TRUE)
   checkException(rd[c(-1,2)], silent = TRUE)
 
-  erd <- new("RangedData")
-  frd <- RangedData(ranges[c(1,3)], filter = filter[1:2], score = score[1:2])
+  erd <- new("RangedData", ranges = new("RangesList", NAMES = character(0)),
+             values = new("SplitXDataFrame", NAMES = character(0)))
+  frd <- RangedData(ranges[c(1,3)], filter = filter[1:2], score = score[1:2],
+                    splitter = "1")
 
   checkIdenticalRD <- function(a, b)
     checkIdentical(as.data.frame(a), as.data.frame(b))
@@ -164,10 +166,11 @@ test_RangedData_subset <- function() {
   checkIdenticalRD(rd[,1:2], rd)
   checkIdenticalRD(rd[,"filter"], rd[,1]) # by name
 
-  firstrow <- RangedData(ranges[1], filter = filter[1], score = score[1])
+  firstrow <- RangedData(ranges[1], filter = filter[1], score = score[1],
+                         splitter = "1")
   checkIdenticalRD(rd[1,], firstrow) # row subsetting
   splitrow <- RangedData(ranges[1:2], filter = filter[c(1,3)],
-                         score = score[c(1,3)])
+                         score = score[c(1,3)], splitter = c("1", "2"))
   checkIdenticalRD(rd[c(1,3),], splitrow) # row subsetting
   
   checkIdenticalRD(rd[1:2, 1], onecol[1:2,]) # combined

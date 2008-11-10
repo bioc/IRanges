@@ -48,7 +48,7 @@ setMethod("dimnames", "RangedData",
 .valid.RangedData.ranges <- function(x)
 {
   if (!identical(lapply(ranges(x), length), lapply(values(x), nrow)))
-    "the number of ranges must equal the number of rows"
+    "'ranges' and 'values' must be of the same length and have the same names"
   else if (!identical(unlist(lapply(ranges(x), names)), rownames(x)))
     "the names of the ranges must equal the rownames"
   else NULL
@@ -78,14 +78,21 @@ RangedData <- function(ranges = IRanges(), ..., splitter = NULL,
   if (length(ranges) != nrow(values))
     stop("lengths of 'ranges' and elements in '...' must be equal")
   rownames(values) <- names(ranges) ## ensure these are identical
-  if (!is.null(splitter)) {
-    if (length(splitter) != length(ranges))
-      stop("length of 'splitter' (if non-NULL) must match length of 'ranges'")
+  if (length(splitter) > 1) {
+    if (length(splitter) != length(ranges)) {
+      if (length(splitter) > length(ranges))
+        stop("length of 'splitter' greater than length of 'ranges'")
+      if (length(ranges) %% length(splitter) != 0)
+        stop("length of 'ranges' not a multiple of 'splitter' length")
+      splitter <- recycleVector(splitter, length(ranges))
+    }
     ranges <- split(ranges, splitter)
     values <- split(values, splitter)
   } else {
     ranges <- RangesList(ranges)
     values <- SplitXDataFrame(values)
+    if (length(splitter))
+      names(ranges) <- names(values) <- splitter
   }
   if (!is.null(annotation) && !isSingleString(annotation))
     stop("'annotation' must be a single string")
@@ -270,8 +277,8 @@ setAs("RangedData", "XDataFrame",
 ###
 
 setMethod("show", "RangedData", function(object) {
-  cat("A RangedData object with", ncol(object), "cols on", nrow(object),
-      "ranges in", length(object), "spaces\n")
+  cat("A", class(object), "object with", ncol(object), "cols on", nrow(object),
+      "ranges in", length(object), "sequences\n")
 })
 
 ### =========================================================================

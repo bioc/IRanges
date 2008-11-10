@@ -137,6 +137,30 @@ setMethod("summary", "RangesList",
 ### Coercion.
 ###
 
+setMethod("as.data.frame", "RangesList",
+          function(x, row.names=NULL, optional=FALSE, ...)
+          {
+            if (!(is.null(row.names) || is.character(row.names)))
+              stop("'row.names'  must be NULL or a character vector")
+            if (!missing(optional) || length(list(...)))
+              warning("'optional' and arguments in '...' ignored")
+            x <- as(x, "IRangesList")
+            df <- as.data.frame(unlist(x), row.names = row.names)
+            if (!is.null(names(x)))
+              df <- cbind(space = rep(names(x), unlist(lapply(x, length))), df)
+            df
+          })
+
+setMethod("unlist", "IRangesList",
+          function(x, recursive = TRUE, use.names = TRUE) {
+            if (!missing(recursive))
+              warning("'recursive' argument currently ignored")
+            ans <- callNextMethod()
+            if (is.null(ans))
+              ans <- IRanges()
+            ans
+          })
+
 ### From an IRangesList object to a NormalIRanges object.
 setAs("IRangesList", "NormalIRanges",
       function(from) reduce(from)[[1]]
@@ -146,8 +170,7 @@ setAs("RangesList", "IRangesList",
       function(from) {
         ir <- lapply(from, as, "IRanges")
         names(ir) <- NULL
-        from@elements <- ir
-        from
+        new("IRangesList", from, elements = ir)
       })
 
 
