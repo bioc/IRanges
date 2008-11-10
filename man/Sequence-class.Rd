@@ -107,8 +107,9 @@
   an "external sequence" that is stored in a run-time encoding format.
   The following classes derive directly from the XRle class.
 
-  The XRle class is a container for storing an external run-time encoding
-  of integers (stored as char values at the C level).
+  The XRleInteger class is a container for storing an external
+  run-length encoding of integers (stored as char values at the C
+  level).
 
   The purpose of these containers is to provide a "pass by address"
   semantic and also to avoid the overhead of copying the sequence

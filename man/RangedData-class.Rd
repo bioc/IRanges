@@ -11,6 +11,7 @@
 \alias{end,RangedData-method}
 \alias{length,RangedData-method}
 \alias{names,RangedData-method}
+\alias{names<-,RangedData-method}
 \alias{ranges}
 \alias{ranges,RangedData-method}
 \alias{start,RangedData-method}
@@ -24,6 +25,7 @@
 % Coercion:
 \alias{as.data.frame,RangedData-method}
 \alias{coerce,RangedData,XDataFrame-method}
+\alias{coerce,XRle,RangedData-method}
 
 % Combining and splitting
 \alias{c,RangedData-method}
@@ -139,6 +141,11 @@
       \code{names(x)}: The names of the spaces (e.g. \code{"chr1"}).
       \code{NULL} or a character vector of the same length as \code{x}.
     }
+    \item{}{
+      \code{names(x) <- value}: Set the names of the spaces, where
+      \code{value} is either \code{NULL} or a character vector of the same
+      length as \code{x}. 
+    }
   }
 
   Other accessors:
@@ -193,6 +200,15 @@
       except the result is an \code{\linkS4class{XDataFrame}} and it
       probably involves less copying, especially if there is only a
       single space.
+    }
+    \item{}{
+      \code{as(from, "RangedData")}: coerces \code{from} to a
+      \code{RangedData}, according to its class:
+      \describe{
+        \item{XRle}{The bounds of the runs become the ranges and the
+          values become a column named \code{score}.
+        }
+      }
     }
   }
 }

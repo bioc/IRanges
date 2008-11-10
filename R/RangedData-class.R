@@ -30,6 +30,14 @@ setMethod("end", "RangedData", function(x) end(ranges(x)))
 setMethod("width", "RangedData", function(x) width(ranges(x)))
 setMethod("length", "RangedData", function(x) length(ranges(x)))
 setMethod("names", "RangedData", function(x) names(ranges(x)))
+setReplaceMethod("names", "RangedData",
+                 function(x, value) {
+                   if (!is.null(value) && !is.character(value))
+                     stop("'value' must be NULL or a character vector")
+                   names(x@ranges) <- value
+                   names(x@values) <- value
+                   x
+                 })
 
 ## values delegates
 setMethod("dim", "RangedData",
@@ -270,6 +278,13 @@ setAs("RangedData", "XDataFrame",
       function(from)
       {
         XDataFrame(as.data.frame(ranges(from)), values(from))
+      })
+
+setAs("XRle", "RangedData",
+      function(from)
+      {
+        RangedData(successiveIRanges(as.integer(from@lengths)),
+                   XDataFrame(score = from@values))
       })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

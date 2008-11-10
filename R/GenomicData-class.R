@@ -85,3 +85,13 @@ setMethod("c", "GenomicData", function(x, ..., recursive = FALSE) {
     callNextMethod(...)
   else callNextMethod(x, ...)
 })
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
+setAs("XRle", "GenomicData",
+      function(from)
+      {
+        as(as(from, "RangedData"), "GenomicData")
+      })

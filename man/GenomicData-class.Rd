@@ -14,6 +14,9 @@
 \alias{strand,GenomicData-method}
 \alias{strand,missing-method}
 
+% coercion
+\alias{coerce,XRle,GenomicData-method}
+
 % hidden workaround
 \alias{c,GenomicData-method}
 
@@ -69,6 +72,20 @@
       across the chromosomes. The \code{genome} argument should be a
       scalar string and is treated as the \code{RangedData}
       annotation. See the examples.
+    }
+  }
+}
+
+\section{Coercion}{
+  \describe{
+    \item{}{
+      \code{as(from, "GenomicData")}: coerces \code{from} to a
+      \code{GenomicData}, according to its class:
+      \describe{
+        \item{XRle}{The bounds of the runs become the ranges and the
+          values become a column named \code{score}.
+        }
+      }
     }
   }
 }
