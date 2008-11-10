@@ -448,18 +448,6 @@ void _RangeAE_insert_at(RangeAE *range_ae, int at, int start, int width)
 }
 
 
-SEXP _RangeAE_asIRanges(const RangeAE *range_ae)
-{
-  SEXP ans, start, width;
-
-  PROTECT(start = _IntAE_asINTEGER(&(range_ae->start)));
-  PROTECT(width = _IntAE_asINTEGER(&(range_ae->width)));
-  ans = _new_IRanges("IRanges", start, width, R_NilValue);
-  UNPROTECT(2);
-  return ans;
-}
-
-
 /****************************************************************************
  * CharAE functions
  */
@@ -541,19 +529,6 @@ SEXP _CharAE_asRAW(const CharAE *char_ae)
 	memcpy(RAW(ans), char_ae->elts, sizeof(char) * char_ae->nelt);
 	UNPROTECT(1);
 	return ans;
-}
-
-/* only until we have a bitset or something smaller than char */
-SEXP _CharAE_asLOGICAL(const CharAE *char_ae)
-{
-  SEXP ans;
-  int i;
-  
-  PROTECT(ans = NEW_LOGICAL(char_ae->nelt));
-  for (i = 0; i < char_ae->nelt; i++)
-    LOGICAL(ans)[i] = char_ae->elts[i];
-  UNPROTECT(1);
-  return ans;
 }
 
 
@@ -638,15 +613,3 @@ void _append_string_to_CharAEAE(CharAEAE *char_aeae, const char *string)
 	return;
 }
 
-SEXP _CharAEAE_asCHARACTER(const CharAEAE *char_aeae)
-{
-  int i;
-  SEXP ans;
-
-  PROTECT(ans = NEW_CHARACTER(char_aeae->nelt));
-  for (i = 0; i < char_aeae->nelt; i++)
-    SET_STRING_ELT(ans, i,
-                   mkCharLen(char_aeae->elts[i].elts, char_aeae->elts[i].nelt));
-  UNPROTECT(1);
-  return ans;
-}

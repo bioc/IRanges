@@ -265,21 +265,6 @@ setAs("RangedData", "XDataFrame",
         XDataFrame(as.data.frame(ranges(from)), values(from))
       })
 
-setAs("XRle", "RangedData",
-      function(from)
-      {
-        RangedData(successiveIRanges(as.integer(from@lengths)),
-                   XDataFrame(score = from@values))
-      })
-
-setAs("RangesList", "RangedData",
-      function(from)
-      {
-        empty <- lapply(from, function(x) new("XDataFrame", nrows = length(x)))
-        new("RangedData", ranges = from,
-            values = do.call("SplitXDataFrame", empty))
-      })
-
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Show
 ###

@@ -126,8 +126,6 @@ void _RangeAE_insert_at(
 	int width
 );
 
-SEXP _RangeAE_asIRanges(const RangeAE *range_ae);
-
 CharAE _new_CharAE(int buflength);
 
 CharAE _new_CharAE_from_string(const char *string);
@@ -145,8 +143,6 @@ void _append_string_to_CharAE(
 
 SEXP _CharAE_asRAW(const CharAE *char_ae);
 
-SEXP _CharAE_asLOGICAL(const CharAE *char_ae);
-
 CharAEAE _new_CharAEAE(
 	int buflength,
 	int nelt
@@ -163,7 +159,6 @@ void _append_string_to_CharAEAE(
 	const char *string
 );
 
-SEXP _CharAEAE_asCHARACTER(const CharAEAE *char_aeae);
 
 /* memcpy_utils.c */
 
