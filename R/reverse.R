@@ -38,7 +38,7 @@ setMethod("reverse", "NormalIRanges",
 )
 
 setMethod("reverse", "XRle",
-    function(x, times)
+    function(x, ...)
     {
         x@lengths <- reverse(x@lengths)
         x@values <- reverse(x@values)
