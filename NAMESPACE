@@ -61,6 +61,7 @@ export(
     narrow,
     reduce,
     gaps,
+    punion, pintersect, psetdiff,
     overlap,
 
     ## Other generic functions:
@@ -126,10 +127,10 @@ exportMethods(
     append,
     "==", "!=",
     c,
+    union, intersect, setdiff,
     split,
     eval,
     t,
-    union, intersect, setdiff,
     "%in%",
     
     ## Methods for generics defined in this package:
@@ -145,6 +146,7 @@ exportMethods(
     narrow,
     reduce,
     gaps,
+    punion, pintersect, psetdiff,
     reverse,
     coverage,
     nir_list,

@@ -49,6 +49,8 @@ setMethod("start", "Ranges", function(x, ...) {end(x) - width(x) + 1L})
 setMethod("width", "Ranges", function(x) {end(x) - start(x) + 1L})
 setMethod("end", "Ranges", function(x, ...) {start(x) + width(x) - 1L})
 
+setMethod("length", "Ranges", function(x) length(start(x)))
+
 setGeneric("start<-", signature="x",
     function(x, check=TRUE, value) standardGeneric("start<-")
 )
@@ -175,31 +177,6 @@ setMethod("whichFirstNotNormal", "Ranges",
         if (length(x) >= 2)
             is_ok <- is_ok & c(TRUE, start(x)[-1] - end(x)[-length(x)] >= 2)
         which(!is_ok)[1]
-    }
-)
-
-### union(), intersect() and setdiff() are not endomorphisms.
-setMethod("union", c("Ranges", "Ranges"),
-    function(x, y)
-    {
-        z <- reduce(c(x, y))
-        z[width(z) != 0]
-    }
-)
-setMethod("intersect", c("Ranges", "Ranges"),
-    function(x, y)
-    {
-        start <- min(c(start(x), start(y)))
-        end <- max(c(end(x), end(y)))
-        setdiff(x, gaps(y, start=start, end=end))
-    }
-)
-setMethod("setdiff", c("Ranges", "Ranges"),
-    function(x, y)
-    {
-        start <- min(c(start(x), start(y)))
-        end <- max(c(end(x), end(y)))
-        gaps(union(gaps(x, start=start, end=end), y), start=start, end=end)
     }
 )
 
