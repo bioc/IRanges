@@ -201,12 +201,16 @@ IRanges <- function(start=NULL, end=NULL, width=NULL)
     } else if (is.null(start)) {
         if (length(width) > length(end))
             stop("'width' has more elements than 'end'")
+        if (length(width) < length(end)) {
+            if (length(width) != 0)
+                width <- rep(width, length.out=length(end))
+            else
+                stop("cannot recycle zero length 'width'")
+        }
         if (length(width) != 0)
             start <- end - width + 1L
         else if (length(end) == 0)
             start <- integer(0)
-        else
-            stop("cannot recycle zero length 'width'")
     } else {
         if (length(width) > length(start))
             stop("'width' has more elements than 'start'")
@@ -386,7 +390,6 @@ setReplaceMethod("end", "IRanges",
     }
 )
 
-### Yes, for IRanges objects!
 setReplaceMethod("names", "IRanges",
     function(x, value)
     {
@@ -491,8 +494,12 @@ setMethod("c", "IRanges",
             args <- list(x, ...)
         else
             args <- list(...)
-        IRanges(unlist(lapply(args, start), use.names=FALSE),
-                unlist(lapply(args, end), use.names=FALSE))
+        ir <- IRanges(unlist(lapply(args, start), use.names=FALSE),
+                      unlist(lapply(args, end), use.names=FALSE))
+        nms <- unlist(lapply(args, names))
+        if (length(nms) == length(ir))
+          names(ir) <- nms
+        ir
     }
 )
 
