@@ -7,6 +7,7 @@ importClassesFrom(Matrix, CsparseMatrix, nsparseMatrix, generalMatrix,
 importFrom(Matrix, colSums)
 
 exportClasses(
+    ListLike,
     Ranges, IRanges, NormalIRanges, XRanges, IntervalTree,
     SequencePtr, RawPtr, IntegerPtr, NumericPtr,
     Sequence, SequenceORvector, Views,
@@ -49,6 +50,9 @@ export(
     XInteger, XNumeric, XDataFrame, SplitXDataFrame,
     XRleInteger,
     newViews, successiveViews,
+
+    ## Generic functions in the ListLike API:
+    sapply,
 
     ## Generic functions in the Ranges API:
     width,
@@ -104,10 +108,9 @@ exportMethods(
     coerce,
     show,
     summary,
-    lapply,
     length,
     names, "names<-",
-    "[", "[<-",
+    "[", "[<-", "[[", "[[<-", "$",
     duplicated,
     rep,
     start,
@@ -134,6 +137,7 @@ exportMethods(
     "%in%",
     
     ## Methods for generics defined in this package:
+    lapply, sapply,
     width,
     "start<-",
     "width<-",
