@@ -7,6 +7,7 @@ importClassesFrom(Matrix, CsparseMatrix, nsparseMatrix, generalMatrix,
 importFrom(Matrix, colSums)
 
 exportClasses(
+    characterORNULL,
     ListLike,
     Ranges, IRanges, NormalIRanges, XRanges, IntervalTree,
     SequencePtr, RawPtr, IntegerPtr, NumericPtr,
@@ -23,6 +24,8 @@ exportClasses(
 export(
     ## Non-generic functions:
     setValidity2, new2,
+    isTRUEorFALSE, isSingleInteger, isSingleNumber, isSingleString,
+    isSingleIntegerOrNA, isSingleNumberOrNA, isSingleStringOrNA,
     sapplyLength,
     safeExplode,
     IRanges,
