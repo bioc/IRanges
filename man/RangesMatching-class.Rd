@@ -81,8 +81,12 @@
 
   as.matrix(matchings)
 
-  as.table(matchings) # hits per query
-  as.table(t(matchings)) # hits per subject
+  if (interactive()) {
+    ## This code seems to not work anymore (because of a change in
+    ## the Matrix package?)
+    as.table(matchings) # hits per query
+    as.table(t(matchings)) # hits per subject
+  }
 }
 \keyword{methods}
 \keyword{classes}
