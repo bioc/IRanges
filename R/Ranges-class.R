@@ -314,11 +314,8 @@ setMethod("precede", c("Ranges", "RangesORmissing"), function(x, subject) {
     s <- s[ord]
   }
   i <- findInterval(end(x), s) + 1L
-  if (!is.null(ord)) {
-    invord <- integer(length(ord))
-    invord[ord] <- seq_along(ord)
-    i <- invord[i]
-  }
+  if (!is.null(ord))
+    i <- ord[i]
   i[i > length(subject)] <- NA
   i
 })
@@ -334,11 +331,8 @@ setMethod("follow", c("Ranges", "RangesORmissing"), function(x, subject) {
   }
   i <- findInterval(start(x) - 1L, e)
   i[i == 0] <- NA
-  if (!is.null(ord)) {
-    invord <- integer(length(ord))
-    invord[ord] <- seq_along(ord)
-    i <- invord[i]
-  }
+  if (!is.null(ord))
+    i <- ord[i]
   i
 })
 
