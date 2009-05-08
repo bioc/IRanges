@@ -27,7 +27,7 @@
 \newcommand{\IRanges}{\Rpackage{IRanges}}
 
 \title{An Introduction to \Rpackage{IRanges}}
-\author{Patrick Aboyoun, Michael Lawrence, Herv\'e Pag\`es}
+\author{Michael Lawrence, Patrick Aboyoun, Herv\'e Pag\`es}
 \date{\today}
 
 \begin{document}
@@ -38,99 +38,258 @@
 options(width=60)
 @
 
-% outline may need tweaking to be more example-oriented
-
 \section{Introduction}
 
 The \IRanges{} package is designed to represent sequences, ranges representing
-indices along those sequences, and data related to those ranges.
-
-% introduce our example here, perhaps CTCF data? Probably need to use
-% Biostrings and/or ShortRead, just to have a realistic example.
+indices along those sequences, and data related to those ranges. In
+this vignette, we will rely on simple, illustrative example datasets,
+rather than large, real-world data, so that each data structure and
+algorithm can be explained in an intuitive, graphical manner.  We
+expect that packages that apply \IRanges{} to a particular problem domain
+will provide vignettes with relevant, realistic examples.
 
 \section{Sequences}
 
-\Rclass{Sequence}
+The \IRanges{} package is primarily interested in the
+representation, manipulation and analysis of sequences. A
+\textit{sequence} is mathematically defined as an ordered list of
+objects, or elements. It differs from a \textit{set} in that order
+matters and the same element can appear multiple times. 
 
-% discuss what we mean by a sequence, conceptually, perhaps using a
-% biological sequence (short read, chromosome, ...?) as an example.
+\IRanges{} supports the use of R vectors to represent
+sequences, and we also formally define a virtual class
+\Rclass{Sequence}, the derivatives of which convey the sequence
+semantic of ordered elements. There are currently two
+\Rclass{Sequence} implementations in \Rpackage{IRanges}: \Rclass{Rle},
+which compresses a sequence through run-length encoding, and
+\Rclass{XSequence}, which refers to its data through an external
+pointer. \Rclass{XSequence} and its derivatives are considered
+low-level infrastructure and, as such, will not be covered by this
+vignette.
 
-% we have two sequence implementations, both designed to handle large data
-
-% should we also have a VectorSequence, that would extend 'vector' and
-% add subset-by-Ranges functionality?
+We begin our demonstration by loading the \IRanges{} package.
+<<initialize, results=hide>>=
+library(IRanges)
+@
 
 \subsection{Run Length Encoding}
 
 % sparse representation, and more (manipulating runs is useful)
 
-\Rclass{Rle}
+The \Rclass{Rle} class represents a run-length encoded (compressed) sequence of
+\Rclass{logical}, \Rclass{integer}, \Rclass{numeric}, \Rclass{complex}, 
+\Rclass{character}, or \Rclass{raw} values.
 
-\subsection{External Sequences}
+<<Rle-construction>>=
+set.seed(0)
+lambda <- c(rep(0.001, 4500), seq(0.001, 10, length = 500), seq(10,0.001, length = 500))
+x <- Rle(rpois(1e7, lambda))
+y <- Rle(rpois(1e7, lambda[c(251:length(lambda), 1:250)]))
+x
+y
+@
 
-% external pointers to avoid copying
-% not for end-user
+<<Rle-accessors>>=
+head(runValue(x))
+head(runLength(x))
+@
 
-\Rclass{XSequence}
-\Rclass{XRaw}
+<<Rle-ops>>=
+x > 0
+x + y
+x > 0 | y > 0
+@
+
+
+<<Rle-summary>>=
+range(x)
+sum(x > 0 | y > 0)
+@
+
+<<Rle-math>>=
+log1p(x)
+@
+
+
+<<Rle-cor>>=
+cor(x, y)
+shiftApply(249:251, y, x, FUN = function(x, y) var(x, y) / (sd(x) * sd(y)))
+@
+
+\subsection{Sequence Extraction}
+
+It is often necessary to extract a sequence from another, in
+analogous manner to ordinary vector extraction or
+subsetting. A simple operation is to select a list
+of consecutive elements from a sequence. This is the purpose of the
+\Rfunction{subseq} function.
+
+%% EXAMPLE: subseq()
+
+Mathematically, a subsequence is slightly more general: selected
+elements need only to be in the same order, not consecutive. We can
+generalize this further to sequence extraction, where the order of the
+elements is no longer fixed. As the order constraint is rarely
+broken, we will use the term \textit{subsequence} to represent the
+result of sequence extraction. The most general way to describe such a
+subsequence would be a vector of indices into the sequence. As it is
+common to extract consecutive values from the sequence, the indices
+are usually more efficiently encoded as a list of ranges, i.e. a
+vector of start positions and a parallel vector of widths.
+
+The general interface for extracting subsequences is
+\Rfunction{seqextract}, which is supported by all \Rclass{Sequence}
+objects, as well as ordinary vectors.
+
+%% EXAMPLE: seqextract(), [
 
 \section{Lists}
 
-% need to segway from Rle to RleList, then explain general list concepts
+\subsection{Basic operations}
 
-% basic list operations (basically same as R list)
+One often wants to organize and manipulate multiple sequences
+simultaneously. We could place multiple \Rclass{Rle} instances, for
+example, into a list. However, a list is too generic; it does not
+confer any information about the specific class of its elements. There
+is no type safety, and it is not possible to define methods
+specifically for homogeneous lists with elements of a particular
+class. For example, for a list of \Rclass{Rle} objects, we may wish to
+define a method that retrieves the run values for each element,
+without special type checking. To enable this, we define a specific
+collection class, \Rclass{RleList}, for storing \Rclass{Rle} objects.
 
-\Rclass{ListLike}
+%% EXAMPLE (construct RleList)
 
-% TypedList features: type validation, compression
-\Rclass{TypedList}
+In fact, we have done the same for many of the other classes in
+\Rpackage{IRanges}, as well as the base atomic vectors (raw, logical,
+integer, numeric, complex and character). All of the collection
+classes derive from the virtual class \Rclass{ListLike}, the
+derivatives of which are all obligated to support two basic list
+operations: element extraction and length retrieval.
 
-\subsection{Simple Lists}
+%% EXAMPLE (element extraction, length)
 
-\Rclass{LogicalList}
-\Rclass{IntegerList}
-\Rclass{NumericList}
-\Rclass{ComplexList}
-\Rclass{CharacterList}
-\Rclass{RawList}
-\Rclass{RleList}
+Most collection types, including \Rclass{RleList}, derive from
+\Rclass{TypedList}, a \Rclass{ListLike} derivative that implements
+the requisite operations, as well as a number of additional
+features. These include familiar list functions, such as
+\Rfunction{c} and \Rfunction{lapply}.
 
-\subsection{Annotated Lists}
+%% EXAMPLE (c, lapply)
 
-\Rclass{AnnotatedList}
+\subsection{Annotated Lists} 
 
+Often when one has a collection of objects, there is a need to attach
+metadata that describes the collection in some way. The
+\Rclass{AnnotatedList} class extends \Rclass{TypedList} to add two
+metadata components: an ordinary \Rclass{list} to hold arbitary
+objects, called \Robject{metadata}, and \Robject{elementMetadata}, a
+data frame with one row per element and any number of columns. Many of
+the high-level list objects in \IRanges{} (described later) are
+\Rclass{AnnotatedList} objects.
+
+\subsection{Advanced Notes}
+
+%% Perhaps this belongs in a separate advanced vignette or the paper?
+
+\Rclass{TypedList} also provides some more advanced features. First,
+as its name suggests, subclasses of \Rclass{TypedList} can specify a
+type from which the class of each of its elements must inherit. For
+example, \Rclass{RleList} directs \Rclass{TypedList} to ensure that
+all of its elements are \Rclass{Rle} objects. One benefit of this type
+safety is that it allows methods dispatching on \Rclass{RleList} to
+assume that all of the elements are really of class \Rclass{Rle}.
+
+A second advanced feature of \Rclass{TypedList} relates to its
+internal representation. Behind the scenes, \Rclass{TypedList} is
+simply an R \Rclass{list}. By default, there is a one-to-one mapping
+between elements of the \Rclass{TypedList} and elements in the
+\Rclass{list}. This is a simple design; however, it is not always
+ideal. If one has many, small objects, the storage overhead,
+especially for S4 objects, would be relatively high. Our solution is
+to \textit{compress} the list by concatenating the elements together,
+if possible. This forms a single, long element that is virtually split
+by the \Rclass{TypedList} interface. A beneficial side effect of this
+approach is that unlisting (concatenating all of the elements)
+is cheap, as it reduces to returning the internal representation.
 
 \section{Sequence Ranges}
 
-% encode subsequences
-% entire object could encode subsequence, eg subsetting Rle
-% or, each range encodes a subsequence, resulting in many (Views)
+When analyzing sequences, we are often interested in specific
+segments, or consecutive subsequences, of the sequence. It is not
+uncommon for an analysis task to focus only on the segments
+themselves, while ignoring the underlying sequence values. A
+consecutive list of indices would be a simple way to select a
+consecutive subsequence. However, a sparser representation would be a
+a range, a pairing of a start position and a width, as used when
+extracting sequences with \Rfunction{subseq} and
+\Rfunction{seqextract}, above.
 
-% introduce basic ranges functionality, eg starts, widths, subsetting
+When analyzing subsequences in \IRanges{}, each range is treated as an
+observation. The virtual \Rclass{Ranges} class represents lists of
+ranges, or, equivalently, sequences of consecutive integers. The most
+commonly used implementation of \Rclass{Ranges} is \Rclass{IRanges},
+which stores the starts and widths as ordinary integer vectors. To
+construct an \Rclass{IRanges} instance, we call the
+\Rfunction{IRanges} constructor. Ranges are normally specified by
+passing two out of the three parameters: start, end and width (see
+\Sexpr{help(IRanges)} for more information).
 
-\Rclass{Ranges}
-\Rclass{IRanges}
+%% Example: IRanges() with different SEW combinations
+
+Accessing the starts, widths and ends is supported by every
+\Rclass{Ranges} implementation.
+
+%% Example: start(), width(), end()
+
+For \Rclass{IRanges} and some other \Rclass{Ranges} derivatives,
+subsetting is also supported.
+
+%% Example: Ranges subsetting
+
+\subsection{Normality}
+
 \Rclass{NormalIRanges}
+
+\subsection{Lists of Ranges}
+
 \Rclass{RangesList}
 \Rclass{IRangesList}
 \Rclass{MaskCollection} % make distinction with RangesList
 
-\Rclass{XRanges}
-\Rclass{IntervalTree}
-% need an IntervalTreeList?
+\subsection{Sequence Extraction}
+
+As \Rclass{Ranges} objects encode subsequences, they may be used
+directly in sequence extraction. Note that when a \textit{normal}
+\Rclass{Ranges} is given as the index, the result is a true
+subsequence, in the mathematical sense.
+
+%% EXAMPLE: subseq() and [ with Ranges
 
 \subsection{Transforming Ranges}
 
 % most utilities fall in here
+
+\paragraph{Making ranges normal}
+
 \Rfunction{reduce}
-\Rfunction{shift}
-\Rfunction{restrict}
-\Rfunction{narrow}
-\Rfunction{reflect}
-\Rfunction{flank}
-\Rfunction{*} % zooming
+
+\paragraph{Making ranges disjoint}
 
 \Rfunction{disjoin}, \Rfunction{disjointBins}
+
+\paragraph{Adjusting starts, ends and widths}
+
+\Rfunction{shift}
+\Rfunction{*} % zooming
+\Rfunction{narrow} % like 'pintersect'
+\Rfunction{threebands} % like 'pdisjoin', if it existed
+
+\paragraph{Other transformations}
+
+\Rfunction{restrict} % like 'intersect'
+\Rfunction{reflect}
+\Rfunction{flank}
 
 \subsection{Set Operations}
 
@@ -143,6 +302,8 @@ indices along those sequences, and data related to those ranges.
 
 \Rclass{RangesMatching}
 \Rclass{RangesMatchingList}
+\Rclass{IntervalTree}
+% need an IntervalTreeList?
 
 \Rfunction{overlap}, \Rfunction{\%in\%}
 
@@ -150,16 +311,41 @@ indices along those sequences, and data related to those ranges.
 
 \Rfunction{nearest}, \Rfunction{precede}, \Rfunction{follow}
 
+\subsection{Mapping Ranges Between Sequences}
+
+\Rclass{RangesMapping}
+\Rfunction{map}
+
 \section{Sequence Views}
 
-% when each range in a Ranges encodes a subsequence, need to
-% manipulate many, possibly overlapping, subsequences
+When we extract a sequence with \Rfunction{seqextract}, we can pass
+multiple ranges, each selecting a single consecutive
+subsequence. Those subsequences are extracted and concatenated into a
+single sequence. There are many cases where the user wishes to avoid
+the concatenation step and instead treat each consecutive subsequence
+as a separate element in a list.  
 
-\Rclass{Views}
+While one could simply store each extracted sequence as an element in
+a list object like a \Rclass{TypedList}, this is undesirable for a
+couple of reasons. First, the user often wants to preserve the
+original sequence and declare a set of interesting regions as an
+overlay. This allows retrieving sequence values even after the ranges
+have been adjusted. Another benefit of an overlay approach is
+performance: the sequence values need not be copied.
 
-\subsection{Views on RLE Sequences}
+For representing such an overlay, the \IRanges{} package provides the
+virtual \Rclass{Views} class, which derives from \Rclass{Ranges} but
+also stores a sequence. Each range is said to represent a
+\textit{view} onto the sequence.
 
-\Rclass{RleViews}
+Here, we will demonstrate the \Rclass{RleViews} class, where the
+sequence is of class \Rclass{Rle}. Other \Rclass{Views}
+implementations exist, such as \Rclass{XStringViews} in the
+\Rpackage{Biostrings} package.
+
+\subsection{Manipulating Views}
+
+\subsection{Aggregating Views}
 
 
 \section{Data Sets}
@@ -178,9 +364,7 @@ indices along those sequences, and data related to those ranges.
 \Rclass{RDApplyParams}
 \Rclass{FilterRules}
 
-%% Classes Not Covered (20)
-%%\Rclass{Alignment}
-%%\Rclass{AlignmentSpace}
+%% Classes Not Covered (16)
 %%\Rclass{ANYTHING}
 %%\Rclass{characterORNULL}
 %%\Rclass{expressionORfunction}
@@ -191,14 +375,12 @@ indices along those sequences, and data related to those ranges.
 %%\Rclass{RangesORmissing}
 %%\Rclass{RawPtr}
 %%\Rclass{SequencePtr}
+%%\Rclass{vectorORfactor}
 %%\Rclass{XDataFrameORNULL}
 %%\Rclass{XInteger}
 %%\Rclass{XIntegerORNULL}
 %%\Rclass{XIntegerViews}
 %%\Rclass{XNumeric}
-%%\Rclass{XRle}
-%%\Rclass{XRleInteger}
-%%\Rclass{XRleIntegerViews}
 
 \begin{table*}[tbp]
 \begin{minipage}{\textwidth}
