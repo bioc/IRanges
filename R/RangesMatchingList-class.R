@@ -3,7 +3,7 @@
 ### -------------------------------------------------------------------------
 
 setClass("RangesMatchingList",
-         prototype = prototype(elementClass = "RangesMatching", compress = FALSE),
+         prototype = prototype(elementType = "RangesMatching"),
          contains = "TypedList")
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14,7 +14,7 @@ setMethod("space", "RangesMatchingList",
           function(x) {
             space <- names(x)
             if (!is.null(space))
-              space <- rep(space, sapply(as.list(x, use.names = FALSE), ncol))
+              space <- rep(space, sapply(as.list(x, use.names = FALSE), length))
             space
           })
 
@@ -24,7 +24,7 @@ setMethod("space", "RangesMatchingList",
 
 RangesMatchingList <- function(...)
 {
-  TypedList("RangesMatchingList", elements = list(...), compress = FALSE)
+  TypedList("RangesMatchingList", list(...))
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -34,7 +34,12 @@ RangesMatchingList <- function(...)
 ## return as.matrix as on RangesMatching, except with space column
 
 setMethod("as.matrix", "RangesMatchingList", function(x) {
-  cbind(space = space(x), do.call(cbind, lapply(x, as.matrix)))
+  mats <- lapply(x, as.matrix)
+  mat <- do.call(rbind, mats)
+  rows <- c(0, head(cumsum(lapply(x, nrow)), -1))
+  cols <- c(0, head(cumsum(lapply(x, ncol)), -1))
+  nr <- sapply(mats, nrow)
+  mat + cbind(rep(cols, nr), rep(rows, nr))
 })
 
 ## count up the matches for each query in every matching
