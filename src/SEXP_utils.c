@@ -22,16 +22,24 @@ SEXP address_asSTRSXP(SEXP s)
 
 /*
  * --- .Call ENTRY POINT ---
- * A C implementation of sapply(list, length)
- * Note: maybe the right place for this is in Biobase...
+ * A fast implementation of 'sapply(x, length)' that works only on a list of
+ * vectors (or NULLs).
  */
-SEXP sapply_length(SEXP list)
+SEXP listofvectors_lengths(SEXP x)
 {
-	int n = LENGTH(list);
-	SEXP ans;
+	SEXP ans, x_elt;
+	int n = LENGTH(x);
+
 	PROTECT(ans = NEW_INTEGER(n));
 	for (int i = 0; i < n; i++) {
-		INTEGER(ans)[i] = LENGTH(VECTOR_ELT(list, i));
+		x_elt = VECTOR_ELT(x, i);
+		if (x_elt == R_NilValue) {
+			INTEGER(ans)[i] = 0;
+			continue;
+		}
+		if (!IS_VECTOR(x_elt))
+			error("element %d not a vector (or NULL)", i + 1);
+		INTEGER(ans)[i] = LENGTH(x_elt);
 	}
 	UNPROTECT(1);
 	return ans;
