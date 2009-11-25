@@ -38,9 +38,7 @@
 \alias{coerce,SharedVector,SharedVector_Pool-method}
 \alias{c,SharedVector_Pool-method}
 \alias{SharedVector.compare}
-\alias{SharedVector.memcpy}
 \alias{SharedVector.copy}
-\alias{SharedVector.reverseCopy}
 \alias{as.numeric,SharedVector-method}
 \alias{==,SharedVector,SharedVector-method}
 \alias{!=,SharedVector,SharedVector-method}
@@ -58,7 +56,6 @@
 \alias{SharedRaw.read}
 \alias{SharedRaw.write}
 \alias{SharedRaw.readComplexes}
-\alias{SharedRaw.append}
 \alias{as.integer,SharedRaw-method}
 \alias{toString,SharedRaw-method}
 
@@ -78,10 +75,12 @@
 \alias{show,SharedDouble-method}
 \alias{as.numeric,SharedDouble-method}
 
-% copy():
-\alias{copy}
-\alias{copy,SharedRaw-method}
-\alias{copy,SharedVector_Pool-method}
+% xvcopy():
+\alias{xvcopy}
+\alias{xvcopy,SharedRaw-method}
+\alias{xvcopy,XVector-method}
+\alias{xvcopy,SharedVector_Pool-method}
+\alias{xvcopy,XRawList-method}
 
 
 \title{IRanges internals}
