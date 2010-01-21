@@ -116,7 +116,22 @@ setMethod("reduce", "RangedData",
               names(values) <- name
               new2(class(y), ranges = ranges, values = values, check = FALSE)
             }
-            endoapply(x[,by], FUN)
+            if (ncol(x) == 0) {
+              ranges <-
+                reduce(ranges(x),
+                       with.inframe.attrib = with.inframe.attrib)
+              initialize(x,
+                         ranges = ranges,
+                         values =
+                         newCompressedList("CompressedSplitDataFrameList",
+                                           new2("DataFrame",
+                                                nrows = sum(elementLengths(ranges)),
+                                                check = FALSE),
+                                           end = cumsum(elementLengths(ranges)),
+                                           NAMES = names(ranges)))
+            } else {
+              endoapply(x[,by], FUN)
+            }
           })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
