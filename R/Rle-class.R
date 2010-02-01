@@ -468,32 +468,37 @@ setMethod("length", "Rle", function(x) sum(runLength(x)))
 setMethod("rep", "Rle",
           function(x, times, length.out, each)
           {
+              usedEach <- FALSE
               if (!missing(each) && length(each) > 0) {
-                  x@lengths <- runLength(x) * as.integer(each[1])
-              } else if (!missing(times) && length(times) > 0) {
-                  times <- as.integer(times)
-                  if (length(times) == length(x)) {
-                      x@lengths <-
-                        runLength(x) +
-                          .Call("Integer_diff_with_0", cumsum(times)[end(x)],
-                                PACKAGE="IRanges") - 1L
-                  } else if (length(times) == 1) {
-                      x <- Rle(values  = rep.int(runValue(x), times),
-                               lengths = rep.int(runLength(x), times),
-                               check = FALSE)
-                  } else {
-                      stop("invalid 'times' argument")
+                  each <- as.integer(each[1L])
+                  if (!is.na(each)) {
+                      if (each < 0)
+                          stop("invalid 'each' argument")
+                      usedEach <- TRUE
+                      if (each == 0)
+                          x <- new(class(x), values = runValue(x)[0L])
+                      else
+                          x@lengths <- each[1L] * runLength(x)
                   }
-              } else if (!missing(length.out) && length(length.out) > 0) {
+              }
+              if (!missing(length.out) && length(length.out) > 0) {
                   n <- length(x)
-                  length.out <- as.integer(length.out[1])
-                  if (length.out == 0) {
-                      x <- new(class(x))
-                  } else if (length.out < n) {
-                      x <- window(x, 1, length.out)
-                  } else if (length.out > n) {
-                      x <- window(rep.int(x, ceiling(length.out / n)), 1, length.out)
+                  length.out <- as.integer(length.out[1L])
+                  if (!is.na(length.out)) {
+                      if (length.out == 0) {
+                          x <- new(class(x), values = runValue(x)[0L])
+                      } else if (length.out < n) {
+                          x <- window(x, 1, length.out)
+                      } else if (length.out > n) {
+                          x <-
+                            window(rep.int(x, ceiling(length.out / n)),
+                                   1, length.out)
+                      }
                   }
+              } else if (!missing(times)) {
+                  if (usedEach && length(times) != 1)
+                      stop("invalid 'times' argument")
+                  x <- rep.int(x, times)
               }
               x
           })
@@ -505,18 +510,20 @@ setGeneric("rep.int", signature = "x",
 setMethod("rep.int", "Rle",
           function(x, times)
           {
+              n <- length(x)
               times <- as.integer(times)
-              if (length(times) == length(x)) {
-                  x@lengths <-
-                    runLength(x) +
-                      .Call("Integer_diff_with_0", cumsum(times)[end(x)],
-                            PACKAGE="IRanges") - 1L
+              if (length(times) == 0 ||
+                  (length(times) > 1 && length(times) < n) ||
+                  any(is.na(times)) || any(times < 0))
+                  stop("invalid 'times' argument")
+              if (length(times) == n) {
+                  runLength(x) <-
+                    .Call("Integer_diff_with_0", cumsum(times)[end(x)],
+                          PACKAGE="IRanges")
               } else if (length(times) == 1) {
                   x <- Rle(values  = rep.int(runValue(x), times),
                            lengths = rep.int(runLength(x), times),
                            check = FALSE)
-              } else {
-                  stop("invalid 'times' argument")
               }
               x
           })
@@ -1198,11 +1205,26 @@ setMethod("show", "Rle",
           {
               lo <- length(object)
               nr <- nrun(object)
+              halfWidth <- getOption("width") %/% 2L
               cat("'", class(runValue(object)), "' Rle of length ", lo,
                   " with ", nr, ifelse(nr == 1, " run\n", " runs\n"),
                   sep = "")
-              cat("  Lengths:  ")
-              utils::str(runLength(object), give.head = FALSE)
-              cat("  Values :  ")
-              utils::str(as.vector(runValue(object)), give.head = FALSE)
+              first <- max(1L, halfWidth)
+              showMatrix <-
+                rbind(as.character(head(runLength(object), first)),
+                      as.character(head(runValue(object), first)))
+              if (nr > first) {
+                  last <- min(nr - first, halfWidth)
+                  showMatrix <-
+                    cbind(showMatrix,
+                          rbind(as.character(tail(runLength(object), last)),
+                                as.character(tail(runValue(object), last))))
+              }
+              if (is.character(runValue(object))) {
+                  showMatrix[2L,] <-
+                    paste("\"", showMatrix[2L,], "\"", sep = "")
+              }
+              showMatrix <- format(showMatrix, justify = "right")
+              cat(labeledLine("  Lengths", showMatrix[1L,], count = FALSE))
+              cat(labeledLine("  Values ", showMatrix[2L,], count = FALSE))
           })
