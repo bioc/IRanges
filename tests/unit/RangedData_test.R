@@ -8,9 +8,19 @@ test_RangedData_construction <- function() {
 
   rd <- RangedData()
   checkTrue(validObject(rd))
+  rd <- RangedData(IRanges())
+  checkTrue(validObject(rd))
+  rd <- RangedData(IRangesList())
+  checkTrue(validObject(rd))
+  rd <- RangedData(IRangesList(IRanges()))
+  checkTrue(validObject(rd))
+  rd <- RangedData(IRangesList(IRanges(), IRanges()))
+  checkTrue(validObject(rd))
+  rd <- RangedData(IRangesList(IRanges(), IRanges(1,1)))
+  checkTrue(validObject(rd))
   rd <- RangedData(ranges)
   checkTrue(validObject(rd))
-  checkIdentical(unname(ranges(rd)), RangesList(ranges))
+  checkIdentical(unname(ranges(rd)), IRangesList(ranges))
   rd <- RangedData(ranges, score)
   checkTrue(validObject(rd))
   checkIdentical(rd[["score"]], score)
@@ -230,6 +240,7 @@ test_RangedData_combine <- function() {
   rd <- RangedData(ranges, score, space = filter)
 
   ## c()
+  checkTrue(validObject(c(rd[1], rd[2])))
   checkIdentical(ranges(c(rd[1], rd[2])), ranges(rd))
   checkIdentical(as.data.frame(values(c(rd[1], rd[2]))),
                  as.data.frame(values(rd)))
@@ -244,6 +255,9 @@ test_RangedData_combine <- function() {
   checkException(split(rd2, filter[1:2]), silent = TRUE)
 
   ## rbind()
+  ranges <- IRanges(c(1,2,3),c(4,5,6))
+  filter <- c(1L, 0L, 1L)
+  score <- c(10L, 2L, NA)
   rd1 <- RangedData(ranges, score, space = filter)
   score2 <- c(15L, 10L, 3L)
   space2 <- c(0L, 1L, 0L)
@@ -252,7 +266,10 @@ test_RangedData_combine <- function() {
   rd <- RangedData(c(ranges, ranges2), score=c(score,score2),
                    space=c(filter, space2))
   checkIdentical(as.data.frame(rbind(rd1, rd2)), as.data.frame(rd))
-  
+  rownames(rd1) <- letters[seq_len(nrow(rd1))]
+  rownames(rd2) <- letters[seq_len(nrow(rd2))]
+  checkTrue(validObject(rbind(rd1, rd2)))
+
   universe(rd2) <- "foo"
   checkException(rbind(rd1, rd2), silent=TRUE)
 }
@@ -268,8 +285,8 @@ test_RangedData_lapply <- function() {
 test_RangedData_range <- function() {
   rd1 <- RangedData(IRanges(c(2,5,1), c(3,7,3)))
   rd2 <- RangedData(IRanges(c(5,2,0), c(6,3,1)))
-  checkIdentical(range(rd1), RangesList("1" = IRanges(1, 7)))
-  checkIdentical(range(rd1, rd2), RangesList("1" = IRanges(0, 7)))
+  checkIdentical(range(rd1), IRangesList("1" = IRanges(1, 7)))
+  checkIdentical(range(rd1, rd2), IRangesList("1" = IRanges(0, 7)))
   checkException(range(rd1, c(2,3)), silent = TRUE)
 }
 
@@ -279,8 +296,10 @@ test_RangedData_dimnames <- function() {
   score <- c(10L, 2L, NA)
   rd <- RangedData(ranges, filter, score = score, space = c(1, 2, 1))
   colnames(rd)[2] <- "foo"
+  checkTrue(validObject(rd))
   checkIdentical(colnames(rd), c("filter", "foo"))
   rownames(rd) <- c("a", "b", "c")
+  checkTrue(validObject(rd))
   checkIdentical(rownames(rd), c("a", "b", "c"))
 }
 
