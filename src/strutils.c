@@ -153,8 +153,8 @@ SEXP strsplit_as_list_of_ints(SEXP x, SEXP sep)
  */
 static int get_svn_time(time_t t, char *out, size_t out_size)
 {
-	int utc_offset, n;
 	struct tm result;
+	int utc_offset, n;
 
 	static const char
 	  *wday2str[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"},
@@ -162,15 +162,13 @@ static int get_svn_time(time_t t, char *out, size_t out_size)
 			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"},
 	  *svn_format = "%d-%02d-%02d %02d:%02d:%02d %+03d00 (%s, %02d %s %d)";
 
-#ifndef __APPLE__
-	tzset();
-	//timezone is not portable (is a function, not a long, on OS X Tiger)
-	utc_offset = - (timezone / 3600);
-#endif
 	//localtime_r() not available on Windows+MinGW
 	//localtime_r(&t, &result);
 	result = *localtime(&t);
 #ifndef __APPLE__
+	tzset();
+	//timezone is not portable (is a function, not a long, on OS X Tiger)
+	utc_offset = - (timezone / 3600);
 	if (result.tm_isdst > 0)
 		utc_offset++;
 #else
