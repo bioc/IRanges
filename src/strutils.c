@@ -170,12 +170,13 @@ static int get_svn_time(time_t t, char *out, size_t out_size)
 	//localtime_r() not available on Windows+MinGW
 	//localtime_r(&t, &result);
 	result = *localtime(&t);
-#ifdef __APPLE__
+#ifndef __APPLE__
+	if (result.tm_isdst > 0)
+		utc_offset++;
+#else
 	//'struct tm' has no member named 'tm_gmtoff' on Windows + MinGW
 	utc_offset = result.tm_gmtoff / 3600;
 #endif
-	if (result.tm_isdst > 0)
-		utc_offset++;
 	n = snprintf(out, out_size, svn_format,
 		result.tm_year + 1900,
 		result.tm_mon + 1,
