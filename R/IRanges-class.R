@@ -525,24 +525,26 @@ setReplaceMethod("[", "IRanges",
 )
 
 setMethod("seqselect", "IRanges",
-    function(x, start=NULL, end=NULL, width=NULL)
-    {
-        if (!is.null(end) || !is.null(width))
-            start <- IRanges(start = start, end = end, width = width)
-        irInfo <- .bracket.Index(start, length(x), names(x), asRanges = TRUE)
-        if (!is.null(irInfo[["msg"]]))
-            stop(irInfo[["msg"]])
-        if (irInfo[["useIdx"]]) {
-            ir <- irInfo[["idx"]]
-            x <-
-              initialize(x,
-                         start = seqselect(start(x), ir),
-                         width = seqselect(width(x), ir),
-                         NAMES = seqselect(names(x), ir))
-        }
-        x
-    }
-)
+          function(x, start=NULL, end=NULL, width=NULL)
+          {
+            if (!is.null(end) || !is.null(width))
+              start <- IRanges(start = start, end = end, width = width)
+            irInfo <- .bracket.Index(start, length(x), names(x),
+                                     asRanges = TRUE)
+            if (!is.null(irInfo[["msg"]]))
+              stop(irInfo[["msg"]])
+            if (irInfo[["useIdx"]]) {
+              ir <- irInfo[["idx"]]
+              x <-
+                initialize(x,
+                           start = seqselect(start(x), ir),
+                           width = seqselect(width(x), ir),
+                           NAMES = seqselect(names(x), ir),
+                           elementMetadata = seqselect(elementMetadata(x), ir))
+            }
+            x
+          }
+          )
 
 setReplaceMethod("seqselect", "IRanges",
     function(x, start = NULL, end = NULL, width = NULL, value)

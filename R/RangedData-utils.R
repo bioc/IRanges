@@ -252,6 +252,36 @@ setMethod("reduce", "RangedData",
           })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### within()
+###
+
+setMethod("within", "RangedData",
+          function(data, expr, ...)
+          {
+            e <- as.env(data)
+            eval(substitute(expr), e, parent.frame())
+            reserved <- c("ranges", "start", "end", "width", "space")
+            l <- mget(setdiff(ls(e), reserved), e)
+            l <- l[!sapply(l, is.null)]
+            nD <- length(del <- setdiff(colnames(data), (nl <- names(l))))
+            for (nm in nl)
+              data[[nm]] <- l[[nm]]
+            for (nm in del) 
+              data[[nm]] <- NULL
+            if (!identical(ranges(data), e$ranges))
+              ranges(data) <- e$ranges
+            else {
+              if (!identical(start(data), e$start))
+                start(data) <- e$start
+              if (!identical(end(data), e$end))
+                end(data) <- e$end
+              if (!identical(width(data), e$width))
+                width(data) <- e$width
+            }
+            data
+          })
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Merging (TODO, don't export)
 ###
 

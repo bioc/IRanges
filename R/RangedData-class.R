@@ -20,7 +20,6 @@
 ## thus trivially compressed. It does, however, incur a slight
 ## performance penalty when applying over the RangedData.
 
-### FIXME: probably needs own metadata slot
 setClass("RangedData", contains = "DataTable",
          representation(ranges = "RangesList", values = "SplitDataFrameList"),
          prototype = prototype(ranges = new("SimpleRangesList"),
@@ -191,6 +190,15 @@ setReplaceMethod("colnames", "RangedData",
                    colnames(x@values) <- value
                    x
                  })
+
+setMethod("columnMetadata", "RangedData", function(x) {
+  columnMetadata(values(x))
+})
+
+setReplaceMethod("columnMetadata", "RangedData", function(x, value) {
+  columnMetadata(values(x)) <- value
+  x
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Validity.
@@ -704,7 +712,7 @@ setMethod("show", "RangedData", function(object) {
       ranges <- unlist(ranges(object), use.names=FALSE)
       values <- unlist(values(object), use.names=FALSE)
       out <-
-        cbind(space = space(object), ranges = showAsCell(ranges),
+        cbind(space = as.character(space(object)), ranges = showAsCell(ranges),
               "|" = rep.int("|", nr))
       if (nc > 0)
         out <-
@@ -729,10 +737,12 @@ setMethod("show", "RangedData", function(object) {
       bottomRanges <- unlist(ranges(bottom), use.names=FALSE)
       bottomValues <- unlist(values(bottom), use.names=FALSE)
       out <-
-        rbind(cbind(space = space(top), ranges = showAsCell(topRanges),
+        rbind(cbind(space = as.character(space(top)),
+                    ranges = showAsCell(topRanges),
                     "|" = rep.int("|", 9)),
               rbind(rep.int("...", 3)),
-              cbind(space = space(bottom), ranges = showAsCell(bottomRanges),
+              cbind(space = as.character(space(bottom)),
+                    ranges = showAsCell(bottomRanges),
                     "|" = rep.int("|", 9)))
       if (nc > 0)
         out <-
@@ -792,4 +802,12 @@ setMethod("unlist", "RangedDataList",
             if (!use.names)
               names(ans) <- NULL
             ans
+          })
+
+setMethod("stack", "RangedDataList",
+          function(x, indName = "sample") {
+            rd <- do.call(rbind, unname(x))
+            spaces <- unlist(lapply(x, space))
+            rd[[indName]] <- rep(names(x), lapply(x, nrow))[order(spaces)]
+            rd
           })

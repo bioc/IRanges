@@ -730,18 +730,28 @@ setMethod("!=", signature(e1="Sequence", e2="Sequence"),
 ### Combining and splitting.
 ###
 
+.rbind.elementMetadata <- function(x, ...)
+{
+  l <- list(x, ...)
+  emd <- lapply(l, elementMetadata)
+  noEmd <- sapply(emd, is.null)
+  if (all(noEmd))
+    return(NULL)
+  newDf <- function(nr) new("DataFrame", nrows = nr)
+  emd[noEmd] <- lapply(elementLengths(l[noEmd]), newDf)
+  allCols <- unique(do.call(c, lapply(emd, colnames)))
+  fillCols <- function(df) {
+    df[setdiff(allCols, colnames(df))] <- list(rep(NA, nrow(df)))
+    df
+  }
+  do.call(rbind, lapply(emd, fillCols))
+}
+
 .c.Sequence <- function(x, ..., recursive = FALSE)
 {
-    if (!is.null(elementMetadata(x))) {
-      emdCols <- colnames(elementMetadata(x))
-      l <- list(x, ...)
-      sameEmdCols <- function(xi)
-        identical(colnames(elementMetadata(xi)), emdCols)
-      if (all(sapply(l, sameEmdCols))) # only if all columns the same
-        elementMetadata(x) <- do.call(rbind, lapply(l, elementMetadata))
-      else elementMetadata(x) <- NULL
-    }
-    x
+  if (!is.null(elementMetadata(x)))
+    elementMetadata(x) <- .rbind.elementMetadata(x, ...)
+  x
 }
 
 setMethod("c", "Sequence",
@@ -761,6 +771,27 @@ setMethod("append", c("Sequence", "Sequence"),
                   c(window(x, 1L, after), values, window(x, after + 1L, xlen))
              })
 
+.stack.ind <- function(x, indName = "space") {
+  spaceLevels <- seq_len(length(x))
+  if (length(names(x)) > 0) {
+    spaceLabels <- names(x)
+  } else {
+    spaceLabels <- as.character(spaceLevels)
+  }
+  ind <- Rle(factor(rep.int(seq_len(length(x)), elementLengths(x)),
+                    levels = spaceLevels,
+                    labels = spaceLabels))
+  do.call(DataFrame, structure(list(ind), names = indName))
+}
+
+setMethod("stack", "Sequence",
+          function(x, indName = "space", valuesName = "values")
+          {
+            df <- DataFrame(.stack.ind(x, indName),
+                            as(unlist(x, use.names=FALSE), "DataFrame"))
+            colnames(df)[2] <- valuesName
+            df
+          })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Looping methods.
@@ -885,6 +916,76 @@ setMethod("mendoapply", "Sequence",
               }
               X
           })
+
+castList <- function(x, ...) {
+  if (is(x, "Sequence"))
+    return(x)
+  if (!is.list(x))
+    stop("'x' must be a 'list'")
+  cl <- lapply(x, class)
+  clnames <- unique(unlist(cl, use.names=FALSE))
+  cons <- NULL
+  if (length(clnames) == 1L) {
+    cl <- cl[[1]]
+    pkg <- packageSlot(cl)
+  } else if (length(clnames)) {
+    contains <- lapply(cl, function(x) getClass(x)@contains)
+    clnames <- c(clnames,
+                 unlist(lapply(contains, names), use.names=FALSE))
+    contab <- table(factor(clnames, unique(clnames)))
+    cl <- names(contab)[contab == length(x)]
+    if (length(cl))
+      pkg <- sapply(do.call(c, unname(contains))[cl], packageSlot)
+  }
+  if (length(cl)) {
+    constructorName <- function(x) {
+      substring(x, 1, 1) <- toupper(substring(x, 1, 1))
+      paste(x, "List", sep = "")
+    }
+    if (is.null(pkg))
+      ns <- topenv()
+    else ns <- getNamespace(pkg[1])
+    consym <- constructorName(cl[1])
+    if (exists(consym, ns))
+      cons <- get(consym, ns)
+    else {
+      if (length(clnames) == 1L) {
+        contains <- getClass(cl)@contains
+        cl <- names(contains)
+        pkg <- sapply(contains, packageSlot)
+      } else {
+        cl <- tail(cl, -1)
+        pkg <- tail(pkg, -1)
+      }
+      connms <- constructorName(cl)
+      ns <- lapply(pkg, getNamespace)
+      coni <- head(which(mapply(exists, connms, ns)), 1)
+      if (length(coni))
+        cons <- get(connms[coni], ns[[coni]])
+    }
+  }
+  if (!is.null(cons))
+    x <- cons(x, ...)
+  else stop("Failed to coerce list into a Sequence subclass")
+  x
+}
+
+seqapply <- function(X, FUN, ...) {
+  castList(lapply(X, FUN, ...))
+}
+
+mseqapply <- function(FUN, ..., MoreArgs = NULL, USE.NAMES = TRUE) {
+  castList(mapply(FUN, ..., MoreArgs = MoreArgs, SIMPLIFY = FALSE,
+                  USE.NAMES = USE.NAMES))
+}
+
+tseqapply <- function(X, INDEX, FUN = NULL, ...) {
+  castList(tapply(X, INDEX, FUN, ..., simplify = FALSE))
+}
+
+seqsplit <- function(x, f, drop=FALSE) {
+  castList(split(x, f, drop))
+}
 
 .shiftApplyInternal <-
 function(SHIFT, X, Y, FUN, ..., OFFSET = 0L, simplify = TRUE, verbose = FALSE)

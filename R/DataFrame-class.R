@@ -160,13 +160,13 @@ DataFrame <- function(..., row.names = NULL)
       nrows[i] <- nrow(element)
       ncols[i] <- ncol(element)
       varlist[[i]] <- as.list(element, use.names = FALSE)
-      if ((length(dim(listData[[i]])) > 1) ||
-          (ncol(element) > 1)) {
+      if ((length(dim(listData[[i]])) > 1) || (ncol(element) > 1)) {
         if (emptynames[i])
           varnames[[i]] <- colnames(element)
         else
           varnames[[i]] <- paste(varnames[[i]], colnames(element), sep = ".")
-      }
+      } else if (is.list(listData[[i]]) && length(names(listData[[i]])))
+          varnames[[i]] <- names(element)
     }
     nr <- max(nrows)
     for (i in which((nrows > 0L) & (nrows < nr) & (nr %% nrows == 0L))) {
@@ -440,8 +440,6 @@ setAs("DataFrame", "data.frame",
 setMethod("as.data.frame", "DataFrame",
           function(x, row.names=NULL, optional=FALSE, ...)
           {
-            if (length(list(...)))
-              stop("arguments in '...' ignored")
             l <- as(x, "list")
             if (is.null(row.names))
               row.names <- rownames(x)
@@ -454,7 +452,7 @@ setMethod("as.data.frame", "DataFrame",
                                   is(y, "CompressedList"))
                                  stop("conversion of list columns to a ",
                                       "data.frame is not supported")
-                               as.data.frame(y, optional = TRUE)
+                               as.data.frame(y, optional = TRUE, ...)
                              }), list(row.names = row.names)))
           })
 
@@ -469,9 +467,16 @@ setAs("data.frame", "DataFrame",
              nrows = nrow(from), rownames = rn, check=FALSE)
       })
 
-# matrices just go through data.frame
+# matrices and tables just go through data.frame
 setAs("matrix", "DataFrame",
       function(from) as(as.data.frame(from), "DataFrame"))
+setAs("table", "DataFrame",
+      function(from) {
+        df <- as.data.frame(from)
+        factors <- sapply(df, is.factor)
+        factors[1] <- FALSE
+        DataFrame(df[1], lapply(df[factors], Rle), df["Freq"])
+      })
 
 setAs("vector", "DataFrame",
       function(from) {
@@ -482,6 +487,8 @@ setAs("vector", "DataFrame",
 ## note that any element named 'row.names' will be interpreted differently
 ## is this a bug or a feature?
 setAs("list", "DataFrame", function(from) do.call(DataFrame, from))
+
+setAs("NULL", "DataFrame", function(from) as(list(), "DataFrame"))
 
 ### FIXME: only exists due to annoying S4 warning due to its caching of
 ### coerce methods.
