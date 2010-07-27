@@ -1,10 +1,13 @@
 \name{RangedDataList-class}
 \docType{class}
 \alias{RangedDataList-class}
-\alias{unlist,RangedDataList-method}
 
 % Constructor
 \alias{RangedDataList}
+
+%% Combining, splitting
+\alias{unlist,RangedDataList-method}
+\alias{stack,RangedDataList-method}
 
 \title{Lists of RangedData}
 \description{
@@ -18,6 +21,16 @@
   \describe{
     \item{}{\code{RangedDataList(...)}: Concatenates the
       \code{RangedData} objects in \code{...} into a new \code{RangedDataList}.
+    }
+  }
+}
+
+\section{Combining and Splitting}{
+  \describe{
+    \item{}{\code{stack(x, indName = "sample")}: Uses \code{rbind} to
+      combine the elements into a single \code{RangedData} object, with
+      a factor, named \code{indName}, in the values indicating the
+      source of each feature.
     }
   }
 }
