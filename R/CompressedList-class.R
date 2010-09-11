@@ -534,6 +534,8 @@ setMethod("c", "CompressedList",
                   unlistData <- do.call(c, lapply(tls, slot, "unlistData"))
               else
                   unlistData <- do.call(rbind, lapply(tls, slot, "unlistData"))
+              elementMetadata <- do.call(.rbind.elementMetadata, tls)
+              rownames(elementMetadata) <- NULL
               partitionEnd <-
                 cumsum(do.call(c,
                                lapply(tls, function(y) {
@@ -551,11 +553,9 @@ setMethod("c", "CompressedList",
                                }))
               if (all(nchar(NAMES) == 0L))
                   NAMES <- NULL
-              eltmetaX <- elementMetadata(x)
-              x <- newCompressedList(class(tls[[1L]]), unlistData,
-                                     end = partitionEnd, NAMES = NAMES)
-              slot(x, "elementMetadata", check=FALSE) <- eltmetaX
-              .c.Sequence(x, ...)
+              newCompressedList(class(tls[[1L]]), unlistData,
+                                end = partitionEnd, NAMES = NAMES,
+                                elementMetadata=elementMetadata)
           })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
