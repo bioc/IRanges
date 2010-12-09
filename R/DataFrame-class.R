@@ -39,7 +39,7 @@ setMethod("rownames", "DataFrame",
           })
 
 setMethod("colnames", "DataFrame",
-          function(x, do.NULL = TRUE, prefix = "col")
+          function(x, do.NULL = FALSE, prefix = "col")
           {
             cn <- names(x)
             if (is.null(cn) && !do.NULL) {
