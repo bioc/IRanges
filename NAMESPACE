@@ -92,7 +92,6 @@ export(
     LogicalList, IntegerList, NumericList, ComplexList,
     CharacterList, RawList, RleList,
     DataFrameList, SplitDataFrameList,
-    coverage.normargWidth,
 
     ## Generic endomorphism functions
     endoapply,
@@ -152,7 +151,7 @@ export(
     isDisjoint,
     whichFirstNotNormal,
     IntervalTree,
-    xvcopy,
+    xvcopy, compact,
     reverse,
     coverage,
     nir_list,
@@ -254,7 +253,7 @@ exportMethods(
     reduce,
     gaps,
     punion, pintersect, psetdiff,
-    xvcopy,
+    xvcopy, compact,
     reverse,
     coverage,
     nobj, grouplength, members, vmembers, togroup, togrouplength,

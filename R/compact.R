@@ -1,7 +1,13 @@
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Copying external vectors.
+### =========================================================================
+### Object compaction
+### -------------------------------------------------------------------------
 ###
-### The xvcopy() generic and its methods.
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### xvcopy()
+###
+### Internal compact() support function. Not intended to be called directly.
 ###
 
 setGeneric("xvcopy", signature="x",
@@ -9,14 +15,15 @@ setGeneric("xvcopy", signature="x",
         standardGeneric("xvcopy")
 )
 
-### Downgrades 'x' to a SharedRaw instance!
-### TODO: Make this a method for SharedVector objects.
-setMethod("xvcopy", "SharedRaw",
+### Downgrades 'x' to one of the 3 concrete direct subclasses of SharedVector
+### (SharedRaw, SharedInteger or SharedDouble). But those subclasses should
+### not be extended anyway (like final classes in Java).
+setMethod("xvcopy", "SharedVector",
     function(x, start=NA, end=NA, width=NA, lkup=NULL, reverse=FALSE)
     {
         solved_SEW <- solveUserSEW(length(x), start=start, end=end, width=width)
         ans_length <- width(solved_SEW)
-        ans <- SharedRaw(ans_length)
+        ans <- SharedVector(class(x), length=ans_length)
         SharedVector.mcopy(ans, 0L, x, start(solved_SEW), ans_length,
                            lkup=lkup, reverse=reverse)
         return(ans)
@@ -81,4 +88,58 @@ setMethod("xvcopy", "XRawList",
         y
     }
 )
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### compact()
+###
+### Compacting an object 'x' is trying to modify its internal representation
+### in order to reduce its size in memory. This internal reorganization
+### should be transparent to the user i.e. 'compact(x)' should look the same
+### as 'x', or, more precisely, 'x' and 'compact(x)' should be interchangeable.
+### However, because of the different internal representations, we generally
+### don't expect 'identical(x, compact(x))' to be TRUE.
+###
+
+setGeneric("compact", signature="x",
+    function(x, check=TRUE, ...) standardGeneric("compact")
+)
+
+### The user should be able to call compact() on anything.
+### By default 'compact(x)' is obtained by compacting all the "components" in
+### 'x'. Only 2 kinds of objects are considered to have "components": lists
+### (the components are the list elements), and S4 objects (the components
+### are the slots). The other objects are not considered to have components,
+### so, by default, compact() does nothing on them. In particular, it does
+### nothing on environments. Also the attributes of an object (other than the
+### slots of an S4 object) are not considered to be "components" and therefore
+### are not compacted.
+### Note that in the absence of some specialized "compact" methods, this
+### default behaviour would visit the tree of all the components,
+### sub-components, sub-sub-components etc of object 'x' without actually
+### modifying anything in 'x'! So of course, additional "compact" methods
+### need to be defined for the objects that can *effectively* be compacted.
+### Otherwise compact() would be equivalent to identity()!
+setMethod("compact", "ANY",
+    function(x, check=TRUE, ...)
+    {
+        if (is.list(x)) {
+            ## By assigning to x[], we keep all the attributes (e.g. the
+            ## row.names if 'x' is a data.frame).
+            x[] <- lapply(x, compact)
+            return(x)
+        }
+        if (isS4(x)) {
+            for (name in slotNames(x))
+                slot(x, name, check=check) <-
+                    compact(slot(x, name), check=check, ...)
+            return(x)
+        }
+        x
+    }
+)
+
+setMethod("compact", "XVector", function(x, check=TRUE, ...) xvcopy(x))
+
+setMethod("compact", "XVectorList", function(x, check=TRUE, ...) xvcopy(x))
 
