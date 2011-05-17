@@ -332,6 +332,43 @@ recycleVector <- function(x, length)
     }
 }
 
+### Must always drop the names of 'arg'.
+recycleArg <- function(arg, argname, length.out)
+{
+    if (length.out == 0L) {
+        if (length(arg) > 1L)
+            stop("invalid length for '", argname, "'")
+        return(recycleVector(arg, length.out))
+    }
+    if (length(arg) == 0L)
+        stop("'", argname, "' has no elements")
+    if (length(arg) > length.out)
+        stop("'", argname, "' is longer than 'x'")
+    if (anyMissing(arg))
+        stop("'", argname, "' contains NAs")
+    if (length(arg) < length.out)
+        arg <- recycleVector(arg, length.out)  # will drop the name
+    else
+        arg <- unname(arg)
+    arg
+}
+
+recycleIntegerArg <- function(arg, argname, length.out)
+{
+    if (!is.numeric(arg))
+        stop("'", argname, "' must be a vector of integers")
+    if (!is.integer(arg))
+        arg <- as.integer(arg)
+    recycleArg(arg, argname, length.out)
+}
+
+recycleNumericArg <- function(arg, argname, length.out)
+{
+    if (!is.numeric(arg))
+        stop("'", argname, "' must be a numeric vector")
+    recycleArg(arg, argname, length.out)
+}
+
 ### Pretty printing
 
 ### Works as long as length(), "[" and as.numeric() work on 'x'.
