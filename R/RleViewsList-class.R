@@ -60,26 +60,20 @@ setMethod("slice", "RleList",
                    includeLower = TRUE, includeUpper = TRUE,
                    rangesOnly = FALSE)
           {
-              if (!isSingleNumber(lower)) {
+              if (!isSingleNumber(lower))
                   stop("'lower' must be a single number")
-              }
-              if (!isSingleNumber(upper)) {
+              if (!isSingleNumber(upper))
                   stop("'upper' must be a single number")
-              }
-              if (!isTRUEorFALSE(includeLower)) {
+              if (!isTRUEorFALSE(includeLower))
                   stop("'includeLower' must be TRUE or FALSE")
-              }
-              if (!isTRUEorFALSE(includeUpper)) {
+              if (!isTRUEorFALSE(includeUpper))
                   stop("'includeUpper' must be TRUE or FALSE")
-              }
-              if (!isTRUEorFALSE(rangesOnly)) {
+              if (!isTRUEorFALSE(rangesOnly))
                   stop("'rangesOnly' must be TRUE or FALSE")
-              }
-              indices <- seq_len(length(x))
               if (lower == -Inf) {
                   ranges <-
-                    RleList(lapply(indices,
-                                   function(i) Rle(TRUE, length(x[[i]]))),
+                    RleList(lapply(elementLengths(x),
+                                   function(len) Rle(TRUE, len)),
                             compress=FALSE)
               } else if (includeLower) {
                   ranges <- (x >= lower)
