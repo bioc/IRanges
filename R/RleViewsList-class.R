@@ -77,15 +77,10 @@ setMethod("slice", "RleList",
               }
               indices <- seq_len(length(x))
               if (lower == -Inf) {
-                  if (sum(as.double(elementLengths(x))) > 2e+09) {
-                      compress=FALSE
-                  } else {
-                      compress=TRUE
-                  }
-                  ranges <- LogicalList(
-                              lapply(indices, function(i) {
-                                     Rle(TRUE, length(x[[i]]))}),
-                              compress=compress)
+                  ranges <-
+                    RleList(lapply(indices,
+                                   function(i) Rle(TRUE, length(x[[i]]))),
+                            compress=FALSE)
               } else if (includeLower) {
                   ranges <- (x >= lower)
               } else {
