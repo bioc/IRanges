@@ -90,21 +90,67 @@ test_List_replace <- function() {
     collection <- IntegerList(one = int1, int2, compress = compress)
 
     checkException(collection[1,2] <- 1L, silent = TRUE)
-    checkException(collection[list()] <- 1L, silent = TRUE)
     checkException(collection[c(-1,2)] <- 1L, silent = TRUE)
 
     newcollection <- collection
-    newcollection[TRUE] <- 1:10
+    newcollection[list()] <- 1L
+    checkIdentical(newcollection, collection)
+
+    newcollection <- collection
+    newcollection[] <- collection
+    checkIdentical(newcollection, collection)
+
+    newcollection1 <- newcollection2 <- collection
+    newcollection1[2:1] <- collection
+    checkIdentical(newcollection1,
+                   IntegerList(one = int2, int1, compress = compress))
+    newcollection2[] <- collection[2:1]
+    checkIdentical(newcollection2, newcollection1)
+
+    value <-  IntegerList(1:10, compress = compress)
+    newcollection <- collection
+    newcollection[TRUE] <- value
     checkIdentical(newcollection,
                    IntegerList(one = 1:10, 1:10, compress = compress))
     newcollection <- collection
-    newcollection[c(TRUE, FALSE)] <- 1:10
+    newcollection[c(TRUE, FALSE)] <- value
     checkIdentical(newcollection,
                    IntegerList(one = 1:10, int2, compress = compress))
     newcollection <- collection
-    newcollection["one"] <- 1:10
+    newcollection["one"] <- value
     checkIdentical(newcollection,
                    IntegerList(one = 1:10, int2, compress = compress))
+
+    newcollection <- collection
+    newcollection[list(6:5, TRUE)] <- list(-1:-2, -99:-100)
+    checkIdentical(newcollection,
+                   IntegerList(one = c(1,2,3,5,-2,-1),
+                               rep(c(-99,-100), 4), compress = compress))
+
+    collection <- IntegerList(one = int1, two = int2, compress = compress)
+
+    newcollection <- collection
+    newcollection[c("two", "one")] <- collection
+    checkIdentical(newcollection,
+                   IntegerList(one = int2, two = int1, compress = compress))
+
+    newcollection <- collection
+    newcollection[list(two=6:5, one=TRUE)] <- list(-1:-2, -99:-100)
+    checkIdentical(newcollection,
+                   IntegerList(one = rep(c(-99,-100), 3),
+                               two = c(15,45,20,1,-2,-1,80,5),
+                               compress = compress))
+
+    collection <- IntegerList(one = c(a=1,b=2), two = c(d=1,b=0,a=5),
+                              compress = compress)
+    newcollection1 <- newcollection2 <- collection
+    newcollection1[list(two=2, one=2:1)] <- list(99, 11:12)
+    checkIdentical(newcollection1,
+                   IntegerList(one = c(a=12,b=11), two = c(d=1,b=99,a=5),
+                               compress = compress))
+
+    newcollection2[list(two="b", one=c("b", "a"))] <- list(99, 11:12)
+    checkIdentical(newcollection2, newcollection1)
   }
 }
 
