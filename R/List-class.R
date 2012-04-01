@@ -333,6 +333,24 @@ mcseqapply <- function(X, FUN, ..., mc.preschedule = TRUE, mc.set.seed = TRUE,
            mc.cleanup = mc.cleanup))
 }
 
+setGeneric("revElements", signature="x",
+    function(x, i) standardGeneric("revElements")
+)
+
+### This method explains the concept of revElements() but is NOT efficient
+### because endoapply() loops over the elements of 'i'.
+### There is a fast method for CompressedList objects though.
+setMethod("revElements", "List",
+    function(x, i)
+    {
+        if (missing(i))
+            i <- seq_len(length(x))
+        x[i] <- endoapply(x[i], rev)
+        x
+    }
+)
+
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Coercion.
 ###
