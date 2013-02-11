@@ -342,3 +342,16 @@ test_DataFrame_annotation <- function() {
   checkIdentical(mcols(df, use.names=TRUE),
                  DataFrame(a = c(1L, 2L, NA), row.names = c("x", "y", "z")))
 }
+
+test_DataFrame_Setter <- function() {
+  DF <- DataFrame("A"=1:5,row.names=letters[1:5])
+  df <- data.frame("A"=1:5,row.names=letters[1:5])
+  checkIdentical(DF['a','B'] <- 1, df['a','B'] <- 1)
+  DF <- DataFrame("A"=1:5,row.names=letters[1:5])
+  df <- data.frame("A"=1:5,row.names=letters[1:5])
+  checkIdentical(DF['c','B'] <- 1, df['c','B'] <- 1)
+  DF <- DataFrame("A"=1:5,row.names=letters[1:5])
+  df <- data.frame("A"=1:5,row.names=letters[1:5])
+  checkIdentical(DF['e','B'] <- 1, df['e','B'] <- 1)
+}
+
