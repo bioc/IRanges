@@ -1055,19 +1055,21 @@ SEXP Hits_encode_overlaps(
 
 /* coverage_methods.c */
 
-SEXP Ranges_integer_coverage(
-	SEXP x_start,
-	SEXP x_width,
+SEXP IRanges_coverage(
+	SEXP x,
+	SEXP shift,
 	SEXP width,
 	SEXP weight,
+	SEXP circle_len,
 	SEXP method
 );
 
-SEXP Ranges_numeric_coverage(
-	SEXP x_start,
-	SEXP x_width,
+SEXP CompressedIRangesList_coverage(
+	SEXP x,
+	SEXP shift,
 	SEXP width,
 	SEXP weight,
+	SEXP circle_lens,
 	SEXP method
 );
 
