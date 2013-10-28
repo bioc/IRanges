@@ -109,7 +109,7 @@
         stop("'x' must be a CompressedIRangesList object")
     x_names <- names(x)
 
-    ## Check 'shift'.
+    ## Check and normalize 'shift'.
     if (!is.list(shift)) {
         if (!(is.numeric(shift) || is(shift, "List")))
             stop("'shift' must be a numeric vector or list-like object")
@@ -117,7 +117,7 @@
     }
     .check_arg_names(shift, "shift", x_names, x_names.label)
 
-    ## Check 'width'.
+    ## Check and normalize 'width'.
     if (is.null(width)) {
         width <- NA_integer_
     } else {
@@ -135,7 +135,7 @@
             width <- setNames(as.integer(width), names(width))
     }
 
-    ## Check 'weight'.
+    ## Check and normalize 'weight'.
     if (!is.list(weight)) {
         if (!(is.numeric(weight) || is(weight, "List")))
             stop("'weight' must be a numeric vector or list-like object")
@@ -143,7 +143,7 @@
     }
     .check_arg_names(weight, "weight", x_names, x_names.label)
 
-    ## Check 'circle.length'.
+    ## Check and normalize 'circle.length'.
     if (identical(circle.length, NA)) {
         circle.length <- NA_integer_
     } else if (!is.numeric(circle.length)) {
@@ -154,7 +154,7 @@
     }
     .check_arg_names(circle.length, "circle.length", x_names, x_names.label)
 
-    ## Check 'method'.
+    ## Check and normalize 'method'.
     method <- match.arg(method)
 
     ## Ready to go...
