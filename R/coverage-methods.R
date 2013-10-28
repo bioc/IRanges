@@ -30,7 +30,7 @@
     if (!is(x, "IRanges"))
         stop("'x' must be an IRanges object")
 
-    ## Check 'shift' at the C level.
+    ## 'shift' will be checked at the C level.
 
     ## Check 'width'.
     if (is.null(width)) {
@@ -41,7 +41,7 @@
         width <- as.integer(width)
     }
 
-    ## Check 'weight' at the C level.
+    ## 'weight' will be checked at the C level.
 
     ## Check 'circle.length'.
     if (!isSingleNumberOrNA(circle.length))
