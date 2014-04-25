@@ -11,25 +11,7 @@ setClass("Ranges", contains="IntegerList", representation("VIRTUAL"))
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### The Ranges API (work still very much in progress):
-###
-###   Basic get/set methods:
-###     length
-###     start, width, end, names
-###     start<-, width<-, end<-, names<-
-###
-###   More basic stuff:
-###     as.matrix, as.data.frame
-###     as.integer, unlist
-###     show
-###
-###   Testing a Ranges object:
-###     isEmpty
-###     isNormal, whichFirstNotNormal
-###
-###   Core endomorphisms:
-###     update
-###     [, [<-, rep
+### Getters/setters.
 ###
 
 setMethod("length", "Ranges", function(x) length(start(x)))
@@ -45,9 +27,9 @@ setGeneric("width", function(x) standardGeneric("width"))
 ### between the starts/widths/ends of a Ranges object. Of course Ranges
 ### subclasses need to implement at least 2 of them!
 ### Note that when width(x)[i] is 0, then end(x)[i] is start(x)[i] - 1
-setMethod("start", "Ranges", function(x, ...) {end(x) - width(x) + 1L})
+setMethod("start", "Ranges", function(x, ...) {1L - width(x) + end(x)})
 setMethod("width", "Ranges", function(x) {end(x) - start(x) + 1L})
-setMethod("end", "Ranges", function(x, ...) {start(x) + width(x) - 1L})
+setMethod("end", "Ranges", function(x, ...) {width(x) - 1L + start(x)})
 
 setGeneric("mid", function(x, ...) standardGeneric("mid"))
 setMethod("mid", "Ranges", function(x) start(x) + as.integer((width(x)-1) / 2))
@@ -68,6 +50,38 @@ setMethod("update", "Ranges",
     function(object, ...)
         as(update(as(object, "IRanges"), ...), class(object))
 )
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity.
+###
+
+### The checking of the names(x) is taken care of by the validity method for
+### Vector objects.
+.valid.Ranges <- function(x)
+{
+    x_start <- start(x)
+    x_end <- end(x)
+    x_width <- width(x)
+    validity_failures <- .Call2("valid_Ranges",
+                                x_start, x_end, x_width,
+                                PACKAGE="IRanges");
+    if (!is.null(validity_failures))
+        return(validity_failures)
+    if (!(is.null(names(x_start)) &&
+          is.null(names(x_end)) &&
+          is.null(names(x_width))))
+        return(paste0("'start(x)', 'end(x)', and 'width(x)' ",
+                      "cannot have names on them"))
+    NULL
+}
+
+setValidity2("Ranges", .valid.Ranges)
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion.
+###
 
 setMethod("as.matrix", "Ranges",
     function(x, ...)
@@ -95,6 +109,13 @@ setMethod("as.data.frame", "Ranges", as.data.frame.Ranges)
 setMethod("as.integer", "Ranges",
     function(x, ...) fancy_mseq(width(x), offset=start(x)-1L)
 )
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### More stuff.
+###
+### TODO: Reorganize this
+###
 
 setMethod("unlist", "Ranges",
     function(x, recursive=TRUE, use.names=TRUE)
