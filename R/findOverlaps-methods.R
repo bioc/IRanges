@@ -174,13 +174,13 @@ findOverlaps_Ranges <- function(query, subject,
              algorithm=c("nclist", "intervaltree"))
 {
     type <- match.arg(type)
-    min.score <- min_overlap_score(maxgap, minoverlap, type)
     select <- match.arg(select)
     algorithm <- match.arg(algorithm)
     if (algorithm != "nclist")
         warning("'algorithm' is ignored when 'query' or 'subject' ",
                 "is an NCList object")
-    findOverlaps_NCList(query, subject, min.score=min.score,
+    findOverlaps_NCList(query, subject,
+                        maxgap=maxgap, minoverlap=minoverlap,
                         type=type, select=select)
 }
 
@@ -508,12 +508,11 @@ countOverlaps_Ranges <- function(query, subject,
               algorithm=c("nclist", "intervaltree"))
 {
     type <- match.arg(type)
-    min.score <- min_overlap_score(maxgap, minoverlap, type)
     algorithm <- match.arg(algorithm)
     if (algorithm != "nclist")
-        warning("'algorithm' is ignored when 'query' or 'subject' ",
-                "is an NCList object")
-    ans <- findOverlaps_NCList(query, subject, min.score=min.score,
+        stop("the 'algorithm' argument is defunct")
+    ans <- findOverlaps_NCList(query, subject,
+                               maxgap=maxgap, minoverlap=minoverlap,
                                type=type, select="count")
     names(ans) <- names(query)
     ans
