@@ -30,7 +30,7 @@
 ## order()
 ## -------
 
-\S4method{order}{Ranges}(..., na.last=TRUE, decreasing=FALSE, method=c("shell", "radix"))
+\S4method{order}{Ranges}(..., na.last=TRUE, decreasing=FALSE, method=c("auto", "shell", "radix"))
 
 ## Generalized parallel comparison of 2 Ranges objects
 ## ---------------------------------------------------
