@@ -1,3 +1,12 @@
+CHANGES IN VERSION 2.40.0
+-------------------------
+
+BUG FIXES
+
+    o Make sure that internal helper coerceToCompressedList() always
+      propagates the mcols.
+
+
 CHANGES IN VERSION 2.38.0
 -------------------------
 
