@@ -313,5 +313,12 @@ test_disjointBins_IntegerRanges <- function()
                  c(1L, 2L, 1L))
   checkIdentical(disjointBins(IRanges(c(3, 1, 10), c(5, 12, 13))),
                  c(2L, 1L, 2L))
+  ir <- IRanges(c(1, 1, 1, 6, 11, 21), c(20, 10, 5, 10, 15, 25),
+                names=LETTERS[1:6])
+  checkIdentical(disjointBins(ir), setNames(c(1:3, 3:1), names(ir)))
+  ir <- ir[c(1:2, 4:3, 5:6)]
+  checkIdentical(disjointBins(ir), setNames(c(3:2, 1L, 1L, 1L, 1L), names(ir)))
+  ir <- rev(ir)
+  checkIdentical(disjointBins(ir), setNames(c(1L, 1L, 1L, 1L, 2:3), names(ir)))
 }
 

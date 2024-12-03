@@ -65,7 +65,7 @@
 }
 
 \details{
-  \itemize{
+  \describe{
     \item{\code{nearest(x, subject, select=c("arbitrary", "all"))}:}{
       The conventional nearest neighbor finder. Returns an integer vector
       containing the index of the nearest neighbor range in \code{subject}
