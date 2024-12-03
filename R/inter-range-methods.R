@@ -506,6 +506,7 @@ setGeneric("disjointBins", function(x, ...) standardGeneric("disjointBins"))
 setMethod("disjointBins", "IntegerRanges",
     function(x)
     {
+        x_names <- names(x)
         x_ord <- NULL
         if (S4Vectors:::isNotSorted(start(x))) { # minimize work for sorted ranges (common)
             x_ord <- order(x)
@@ -518,13 +519,15 @@ setMethod("disjointBins", "IntegerRanges",
             rev_ord[x_ord] <- seq_along(rev_ord)
             bins <- bins[rev_ord]
         }
-        names(bins) <- names(x)
+        names(bins) <- x_names
         bins
     }
 )
 
 ### Overwrite above method with trivial method for NormalIRanges objects.
-setMethod("disjointBins", "NormalIRanges", function(x) rep.int(1L, length(x)))
+setMethod("disjointBins", "NormalIRanges",
+    function(x) setNames(rep.int(1L, length(x)), names(x))
+)
 
 setMethod("disjointBins", "IntegerRangesList",
     function(x) as(lapply(x, disjointBins), "IntegerList")
