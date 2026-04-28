@@ -127,9 +127,9 @@ findOverlapPairs(query, subject, ...)
     the maximum \emph{gap} that is allowed between 2 ranges for the ranges
     to be considered as overlapping. The \emph{gap} between 2 ranges
     is the number of positions that separate them. The \emph{gap} between
-    2 adjacent ranges is 0. By convention when one range has its start or
-    end strictly inside the other (i.e. non-disjoint ranges), the \emph{gap}
-    is considered to be -1.
+    two adjacent ranges is 0. By convention when one range has its start or
+    end strictly inside another range (i.e. non-disjoint ranges), the
+    \emph{gap} between the two ranges is considered to be -1.
 
     If \code{type} is set to anything else, \code{maxgap} has a special
     meaning that depends on the particular \code{type}. See \code{type}
