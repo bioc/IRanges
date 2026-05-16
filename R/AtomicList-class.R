@@ -44,7 +44,7 @@ setClass("FactorList", representation("VIRTUAL"),
 setClass("SimpleAtomicList",
          contains =  c("AtomicList", "SimpleList"),
          representation("VIRTUAL"))
- 
+
 setClass("SimpleLogicalList",
          prototype = prototype(elementType = "logical"),
          contains = c("LogicalList", "SimpleAtomicList"))
@@ -218,19 +218,14 @@ CoercerToList <- function(type, compress) {
 ### Could actually be made the "table" method for List objects. Will work on
 ### any List object 'x' for which 'as.factor(unlist(x))' works.
 setMethod("table", "AtomicList",
-    function(...)
+    function(x, ...)
     {
-        args <- list(...)
-        if (length(args) != 1L)
-            stop("\"table\" method for AtomicList objects ",
+        dotargs <- list(...)
+        if (length(dotargs) != 0L)
+            stop("the table() method for AtomicList objects ",
                  "can only take one input object")
-        x <- args[[1L]]
-        if (!pcompareRecursively(x)) {
-            ## Not sure why callNextMethod() doesn't work. Is it because of
-            ## dispatch on the ellipsis?
-            #return(callNextMethod())
-            return(selectMethod("table", "Vector")(...))
-        }
+        if (!pcompareRecursively(x))
+            return(callNextMethod())
         y1 <- togroup(PartitioningByWidth(x))
         attributes(y1) <- list(levels=as.character(seq_along(x)),
                                class="factor")
@@ -244,13 +239,12 @@ setMethod("table", "AtomicList",
     }
 )
 
-setMethod("table", "SimpleAtomicList", function(...)
+setMethod("table", "SimpleAtomicList", function(x, ...)
 {
-    args <- list(...)
-    if (length(args) != 1L)
-        stop("\"table\" method for SimpleAtomicList objects ",
+    dotargs <- list(...)
+    if (length(dotargs) != 0L)
+        stop("the table() method for SimpleAtomicList objects ",
              "can only take one input object")
-    x <- args[[1L]]
     levs <- sort(unique(unlist(lapply(x, function(xi) {
         if (!is.null(levels(xi))) levels(xi) else unique(xi)
     }), use.names=FALSE)))
@@ -385,11 +379,11 @@ setMethod("unlist", "SimpleFactorList",
 }
 
 setMethod("show", "AtomicList",
-          function(object) 
+          function(object)
           {
               cat(classNameForDisplay(object), " of length ",
                   length(object), "\n", sep = "")
-              .showAtomicList(object, 10) 
+              .showAtomicList(object, 10)
           }
 )
 
