@@ -54,8 +54,8 @@ setMethod("as.env", "SDFLWrapperForTransform",
               S4Vectors:::addSelfRef(x@delegate, env)
           })
 
-transform.SplitDataFrameList <- function(`_data`, ...) {
-  illConceivedWrapper <- new("SDFLWrapperForTransform", delegate=`_data`)
+transform.SplitDataFrameList <- function(x, ...) {
+  illConceivedWrapper <- new("SDFLWrapperForTransform", delegate=x)
   transform.DataFrame(illConceivedWrapper, ...)@delegate
 }
 

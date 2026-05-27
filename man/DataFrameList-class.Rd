@@ -225,10 +225,10 @@
 
 \section{Transformation}{
 \describe{
-    \item{\code{transform(`_data`, ...)}:}{ Transforms a
+    \item{\code{transform(x, ...)}:}{ Transforms a
     \code{SplitDataFrame} in a manner analogous to the
     base \code{\link{transform}}, where the columns are \code{List}
-    objects adhering to the structure of \code{_data}.
+    objects adhering to the structure of \code{x}.
   }
  }
 }
