@@ -38,7 +38,19 @@ setGeneric("subject", function(x) standardGeneric("subject"))
 setMethod("subject", "Views", function(x) x@subject)
 
 setMethod("ranges", "Views",
-    function(x, use.names=TRUE, use.mcols=FALSE) x@ranges
+    function(x, use.names=TRUE, use.mcols=FALSE)
+    {
+        if (!isTRUEorFALSE(use.names))
+            stop(wmsg("'use.names' must be TRUE or FALSE"))
+        if (!isTRUEorFALSE(use.mcols))
+            stop(wmsg("'use.mcols' must be TRUE or FALSE"))
+        ans <- x@ranges
+        if (!use.names)
+            names(ans) <- NULL
+        if (use.mcols)
+            mcols(ans) <-mcols(x, use.names=FALSE)
+        ans
+    }
 )
 
 setGeneric("ranges<-", function(x, ..., value) standardGeneric("ranges<-"))
