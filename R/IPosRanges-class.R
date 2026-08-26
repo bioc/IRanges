@@ -91,12 +91,11 @@ setMethod("as.matrix", "IPosRanges",
                dimnames=list(names(x), NULL))
 )
 
-### S3/S4 combo for as.data.frame.IPosRanges
+### --- S3/S4 combo for as.data.frame.IPosRanges ---
 ### Inherits the 'validRN' argument from as.data.frame.vector(), and
 ### the 'stringsAsFactors' argument from as.data.frame.character(),
 ### as.data.frame.list(), and as.data.frame.matrix().
-### Silently ignores the 'optional' argument.
-.as.data.frame.IPosRanges <- function(x, row.names=NULL, optional=FALSE,
+.as.data.frame.IPosRanges <- function(x, row.names=NULL,
                                       validRN=TRUE, stringsAsFactors=FALSE)
 {
     ans <- data.frame(start=start(x),
@@ -112,8 +111,9 @@ setMethod("as.matrix", "IPosRanges",
                                         stringsAsFactors=stringsAsFactors))
     ans
 }
+### Silently ignores the 'optional' argument.
 as.data.frame.IPosRanges <- function(x, row.names=NULL, optional=FALSE, ...)
-    .as.data.frame.IPosRanges(x, row.names=NULL, optional=FALSE, ...)
+    .as.data.frame.IPosRanges(x, row.names=NULL, ...)
 setMethod("as.data.frame", "IPosRanges", as.data.frame.IPosRanges)
 
 

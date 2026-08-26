@@ -405,17 +405,16 @@ setAs("ANY", "UnstitchedIPos", function(from) IPos(from, stitch=FALSE))
 setAs("ANY", "StitchedIPos", function(from) IPos(from, stitch=TRUE))
 setAs("ANY", "IPos", function(from) IPos(from))
 
-### S3/S4 combo for as.data.frame.IPos
-### The "as.data.frame" method for IntegerRanges objects works on an IPos
-### object but returns a data.frame with identical "start" and "end" columns,
-### and a "width" column filled with 1. We overwrite it to return a data.frame
-### with a "pos" column instead of the "start" and "end" columns, and no
-### "width" column.
+### --- S3/S4 combo for as.data.frame.IPos ---
+### as.data.frame.IPosRanges() works fine on an IPos object but it returns a
+### data.frame with identical "start" and "end" columns, and a "width" column
+### filled with 1. So we overwrite it with as.data.frame.IPos() which returns
+### a data.frame with just a "pos" column instead of the "start" and "end"
+### columns, and no "width" column.
 ### Inherits the 'validRN' argument from as.data.frame.vector(), and
 ### the 'stringsAsFactors' argument from as.data.frame.character(),
 ### as.data.frame.list(), and as.data.frame.matrix().
-### Silently ignores the 'optional' argument.
-.as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE,
+.as.data.frame.IPos <- function(x, row.names=NULL,
                                 validRN=TRUE, stringsAsFactors=FALSE)
 {
     ans <- data.frame(pos=pos(x),
@@ -429,8 +428,9 @@ setAs("ANY", "IPos", function(from) IPos(from))
                                         stringsAsFactors=stringsAsFactors))
     ans
 }
+### Silently ignores the 'optional' argument.
 as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE, ...)
-    .as.data.frame.IPos(x, row.names=NULL, optional=FALSE, ...)
+    .as.data.frame.IPos(x, row.names=NULL, ...)
 setMethod("as.data.frame", "IPos", as.data.frame.IPos)
 
 
