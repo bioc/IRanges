@@ -411,19 +411,27 @@ setAs("ANY", "IPos", function(from) IPos(from))
 ### and a "width" column filled with 1. We overwrite it to return a data.frame
 ### with a "pos" column instead of the "start" and "end" columns, and no
 ### "width" column.
-.as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE)
+### Inherits the 'validRN' argument from as.data.frame.vector(), and
+### the 'stringsAsFactors' argument from as.data.frame.character(),
+### as.data.frame.list(), and as.data.frame.matrix().
+### Silently ignores the 'optional' argument.
+.as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE,
+                                validRN=TRUE, stringsAsFactors=FALSE)
 {
-    if (!identical(optional, FALSE))
-        warning(wmsg("'optional' argument was ignored"))
-    ans <- data.frame(pos=pos(x), row.names=row.names, stringsAsFactors=FALSE)
+    ans <- data.frame(pos=pos(x),
+                      row.names=row.names, check.names=FALSE,
+                      stringsAsFactors=stringsAsFactors)
+    ans$names <- names(x)
     x_mcols <- mcols(x, use.names=FALSE)  # can be NULL!
     if (!is.null(x_mcols))
-        ans <- cbind(ans, as.data.frame(x_mcols, optional=TRUE))
+        ans <- cbind(ans, as.data.frame(x_mcols, optional=TRUE,
+                                        validRN=validRN,
+                                        stringsAsFactors=stringsAsFactors))
     ans
 }
 as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE, ...)
     .as.data.frame.IPos(x, row.names=NULL, optional=FALSE, ...)
-setMethod("as.data.frame", "IPos", .as.data.frame.IPos)
+setMethod("as.data.frame", "IPos", as.data.frame.IPos)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -92,25 +92,29 @@ setMethod("as.matrix", "IPosRanges",
 )
 
 ### S3/S4 combo for as.data.frame.IPosRanges
-.as.data.frame.IPosRanges <- function(x, row.names=NULL, optional=FALSE)
+### Inherits the 'validRN' argument from as.data.frame.vector(), and
+### the 'stringsAsFactors' argument from as.data.frame.character(),
+### as.data.frame.list(), and as.data.frame.matrix().
+### Silently ignores the 'optional' argument.
+.as.data.frame.IPosRanges <- function(x, row.names=NULL, optional=FALSE,
+                                      validRN=TRUE, stringsAsFactors=FALSE)
 {
-    if (!identical(optional, FALSE))
-        warning(wmsg("'optional' argument was ignored"))
     ans <- data.frame(start=start(x),
                       end=end(x),
                       width=width(x),
-                      row.names=row.names,
-                      check.names=FALSE,
-                      stringsAsFactors=FALSE)
+                      row.names=row.names, check.names=FALSE,
+                      stringsAsFactors=stringsAsFactors)
     ans$names <- names(x)
     x_mcols <- mcols(x, use.names=FALSE)  # can be NULL!
     if (!is.null(x_mcols))
-        ans <- cbind(ans, as.data.frame(x_mcols, optional=TRUE))
+        ans <- cbind(ans, as.data.frame(x_mcols, optional=TRUE,
+                                        validRN=validRN,
+                                        stringsAsFactors=stringsAsFactors))
     ans
 }
 as.data.frame.IPosRanges <- function(x, row.names=NULL, optional=FALSE, ...)
     .as.data.frame.IPosRanges(x, row.names=NULL, optional=FALSE, ...)
-setMethod("as.data.frame", "IPosRanges", .as.data.frame.IPosRanges)
+setMethod("as.data.frame", "IPosRanges", as.data.frame.IPosRanges)
 
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
