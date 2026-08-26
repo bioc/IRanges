@@ -430,7 +430,7 @@ setAs("ANY", "IPos", function(from) IPos(from))
 }
 ### Silently ignores the 'optional' argument.
 as.data.frame.IPos <- function(x, row.names=NULL, optional=FALSE, ...)
-    .as.data.frame.IPos(x, row.names=NULL, ...)
+    .as.data.frame.IPos(x, row.names=row.names, ...)
 setMethod("as.data.frame", "IPos", as.data.frame.IPos)
 
 
