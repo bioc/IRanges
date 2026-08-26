@@ -423,8 +423,7 @@ setAs("ANY", "IPos", function(from) IPos(from))
     ans$names <- names(x)
     x_mcols <- mcols(x, use.names=FALSE)  # can be NULL!
     if (!is.null(x_mcols))
-        ans <- cbind(ans, as.data.frame(x_mcols, optional=TRUE,
-                                        validRN=validRN,
+        ans <- cbind(ans, as.data.frame(x_mcols, validRN=validRN,
                                         stringsAsFactors=stringsAsFactors))
     ans
 }
