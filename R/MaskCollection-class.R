@@ -357,42 +357,60 @@ setAs("MaskCollection", "NormalIRanges",
 ### The "show" method.
 ###
 
-MaskCollection.show_frame <- function(x)
+### Returns a character matrix where all columns have a fixed width.
+### The returned matrix has 6 columns if 'full' is TRUE (the default), and
+### only 2 columns otherwise. It has 1 + length(x) rows (1 row for the field
+### names + 1 row per mask in 'x').
+.from_MaskCollection_to_formatted_matrix <- function(x, full=TRUE)
+{
+    stopifnot(is(x, "MaskCollection"))
+    maskedwidth <- c("maskedwidth", maskedwidth(x))
+    maskedratio <- c("maskedratio", sprintf("%1.2f", maskedratio(x)))
+    ans <- cbind(format(unname(maskedwidth), justify="right"),
+                 format(unname(maskedratio), justify="right"))
+    if (!full)
+        return(ans)
+    active <- c("active", active(x))
+    ans <- cbind(format(c("", seq_along(x)), justify="left"),
+                 ans,
+                 format(unname(active), justify="right"))
+    x_names <- names(x)
+    if (!is.null(x_names))
+        ans <- cbind(ans, format(c("names", x_names), justify="left"))
+    cbind(ans, format(unname(c("desc", desc(x))), justify="left"))
+}
+
+.show_formatted_matrix <- function(m, margin="")
+{
+    stopifnot(is.matrix(m), is.character(m))
+    for (i in seq_len(nrow(m)))
+        cat(margin, paste(m[i, ], collapse=" "), "\n", sep="")
+}
+
+MaskCollection.show_frame <- function(x, margin="")
 {
     lx <- length(x)
-    cat("masks:")
-    if (lx == 0) {
+    cat(margin, "masks:", sep="")
+    if (lx == 0L) {
         cat(" NONE\n")
     } else {
         cat("\n")
-        ## Explictely specify 'row.names=NULL' otherwise data.frame() will
-        ## try to use the names of the first component that has suitable
-        ## names, which could be 'active(x)' (3rd component) if 'x' has names.
-        frame <- data.frame(maskedwidth=maskedwidth(x),
-                            maskedratio=maskedratio(x),
-                            active=active(x),
-                            row.names=NULL,
-                            check.names=FALSE)
-        frame$names <- names(x)
-        frame$desc <- desc(x)
-        show(frame)
-        if (lx >= 2) {
-            margin <- format("", width=nchar(as.character(lx)))
-            cat("all masks together:\n")
-            mask0 <- collapse(`active<-`(x, TRUE))
-            frame <- data.frame(maskedwidth=maskedwidth(mask0),
-                                maskedratio=maskedratio(mask0),
-                                check.names=FALSE)
-            row.names(frame) <- margin
-            show(frame)
+        m1 <- .from_MaskCollection_to_formatted_matrix(x)
+        margin1 <- paste0(margin, " ")
+        .show_formatted_matrix(m1, margin=margin1)
+        if (lx >= 2L) {
+            W23 <- unique(nchar(m1[ , 1L]))
+            stopifnot(length(W23) == 1L)
+            brn <- format("", width=W23)  # blank rownames
+            cat(margin, "all masks together:\n", sep="")
+            x2 <- collapse(`active<-`(x, TRUE))
+            m2 <- .from_MaskCollection_to_formatted_matrix(x2, full=FALSE)
+            .show_formatted_matrix(cbind(brn, m2), margin=margin1)
             if (sum(active(x)) < lx) {
-                cat("all active masks together:\n")
-                mask1 <- collapse(x)
-                frame <- data.frame(maskedwidth=maskedwidth(mask1),
-                                    maskedratio=maskedratio(mask1),
-                                    check.names=FALSE)
-                row.names(frame) <- margin
-                show(frame)
+                cat(margin, "all active masks together:\n", sep="")
+                x3 <- collapse(x)
+                m3 <- .from_MaskCollection_to_formatted_matrix(x3, full=FALSE)
+                .show_formatted_matrix(cbind(brn, m3), margin=margin1)
             }
         }
     }
@@ -403,8 +421,8 @@ setMethod("show", "MaskCollection",
     {
         lo <- length(object)
         cat(class(object), " of length ", lo,
-            " and width ", width(object), "\n", sep="")
-        MaskCollection.show_frame(object)
+            " and width ", width(object), ":\n", sep="")
+        MaskCollection.show_frame(object, margin="|")
     }
 )
 
