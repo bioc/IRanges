@@ -638,7 +638,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
       "within".
 
     o No more limit on the max depth of *on-the-fly* NCList objects. Note that
-      the limit remains and is still 100000 when the user explicitely calls the
+      the limit remains and is still 100000 when the user explicitly calls the
       NCList() or GNCList() constructor.
 
     o Rename 'ignoreSelf' and 'ignoreRedundant' argument of the
@@ -780,7 +780,7 @@ NEW FEATURES
       search with findOverlaps(). NCList() and NCLists() are replacements for
       IntervalTree() and IntervalForest() that use Nested Containment Lists
       instead of interval trees. For a one time use, it's not advised to
-      explicitely preprocess the input. This is because findOverlaps() or
+      explicitly preprocess the input. This is because findOverlaps() or
       countOverlaps() will take care of it and do a better job at it (that is,
       they preprocess only what's needed when it's needed and release memory
       as they go).
@@ -810,7 +810,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
         a Ranges object (replacement for IntervalTree()), NCLists() for a
         RangesList object (replacement for IntervalForest()), and GNCList()
         for a GenomicRanges object (replacement for GIntervalTree()).
-        However, for a one time use, it's not advised to explicitely preprocess
+        However, for a one time use, it's not advised to explicitly preprocess
         the input. This is because findOverlaps() or countOverlaps() will take
         care of it and do a better job at it (that is, they preprocess only
         what's needed when it's needed and release memory as they go).

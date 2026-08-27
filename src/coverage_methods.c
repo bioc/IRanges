@@ -453,7 +453,7 @@ static void check_arg_is_recyclable(int arg_len, int x_len,
 /*
  * This is probably overly cautious. Could be that the cast from double to int
  * with (int) already does exactly this (i.e. produces an NA_INTEGER for all
- * the cases explicitely handled here) and is portable.
+ * the cases explicitly handled here) and is portable.
  */
 static int double2int(double x)
 {

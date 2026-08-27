@@ -101,7 +101,7 @@ NCLists(x, circle.length=NA_integer_)
           \code{\link[GenomicRanges]{GNCList}} for a
           \link[GenomicRanges]{GenomicRanges} object (replacement for
           \code{GIntervalTree}).
-          However, for a one-time use, it is NOT advised to explicitely
+          However, for a one-time use, it is NOT advised to explicitly
           preprocess the input. This is because \code{\link{findOverlaps}}
           or \code{\link{countOverlaps}} will take care of it and do a better
           job at it (by preprocessing only what's needed when it's needed,
@@ -165,7 +165,7 @@ NCLists(x, circle.length=NA_integer_)
 \examples{
 ## The example below is for illustration purpose only and does NOT
 ## reflect typical usage. This is because, for a one-time use, it is
-## NOT advised to explicitely preprocess the input for findOverlaps()
+## NOT advised to explicitly preprocess the input for findOverlaps()
 ## or countOverlaps(). These functions will take care of it and do a
 ## better job at it (by preprocessing only what's needed when it's
 ## needed, and release memory as they go).
